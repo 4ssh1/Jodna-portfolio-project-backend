@@ -14,11 +14,18 @@ const UserSchema = mongoose.Schema({
     email:{
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        validate: {
+            validator: async function (value) {
+                return /\S+@\S+\.\S+/.test(value)
+            },
+            message: "Enter a valid email address"
+        }
     },
     password: {
         type: String,
-        required: true
+        required: true, 
+        minlength: 8
     },
     profilePic:{
         type: Buffer
@@ -31,7 +38,7 @@ const UserSchema = mongoose.Schema({
         type:Number,
         default: 0
     }
-})
+}, {timeStamps: true})
 
 UserSchema.pre("save", async function(next){
     if(this.isModified("password")) return next()
