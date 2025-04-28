@@ -27,17 +27,6 @@ const UserSchema = mongoose.Schema({
         type: String,
         required: true, 
         minlength: 8
-    },
-    profilePic:{
-        type: Buffer
-    },
-    bio:{
-        type: String,
-        default: ""
-    },
-    views:{
-        type:Number,
-        default: 0
     }
 }, {timeStamps: true})
 

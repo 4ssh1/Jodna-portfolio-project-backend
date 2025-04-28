@@ -30,7 +30,15 @@ const ProjectSchema = mongoose.Schema({
         enum: ['frontend', 'backend', 'fullstack', 'other'],
         default: 'other'
     },
-    technologies: [String]
+    technologies: [String],
+    bio:{
+        type: String,
+        default: ""
+    },
+    views:{
+        type:Number,
+        default: 0
+    }
 })
 
 module.exports = mongoose.model('Project', ProjectSchema)
