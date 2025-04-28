@@ -2,14 +2,19 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 
 const UserSchema = mongoose.Schema({
-    firstname: {
+    fullname: {
         type: String,
         required: true,
-        trim: true,
-    },
-    lastname:{
-        type: String,
-        required: true
+        unique: true,
+        validate: {
+            validator: async function (value) {
+                const users = await this.constructor.findOne({
+                    name: new RegExp(`^${value}$`, 'i')
+                })
+                return !users
+            },
+            message: "Username exists, try using a nickname"
+        }
     },
     email:{
         type: String,
