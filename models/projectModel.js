@@ -38,6 +38,10 @@ const ProjectSchema = mongoose.Schema({
     views:{
         type:Number,
         default: 0
+    },
+    isDraft: {
+        type: Boolean,
+        default: false
     }
 })
 
