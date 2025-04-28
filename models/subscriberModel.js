@@ -3,7 +3,9 @@ const mongoose = require('mongoose')
 const SubscribersSchema = mongoose.Schema({
     email:{
         type: String,
-        required: true, 
+        required: true,
+        lowercase: true,
+        unique: true, 
         validate: {
             validator: async function(value){
                 return /\S+@\S+\.\S+/.test(value)

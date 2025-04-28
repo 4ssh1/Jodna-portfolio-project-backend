@@ -15,6 +15,7 @@ const UserSchema = mongoose.Schema({
         type: String,
         required: true,
         unique: true,
+        lowercase: true,
         validate: {
             validator: async function (value) {
                 return /\S+@\S+\.\S+/.test(value)
