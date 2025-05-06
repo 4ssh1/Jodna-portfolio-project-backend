@@ -10,14 +10,13 @@ A portfolio builder that allows users to register, upload projects, showcase ski
 
 ## 🚀 Tech Stack
 
-- **Frontend:** React, Tailwind CSS
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB (Mongoose ODM)
 - **Authentication:** JWT, bcrypt
 - **File Uploads:** Cloudinary
 - **Email Service:** Nodemailer
 - **API Docs:** Swagger (Live Docs)
-- **Testing:** Jest, Supertest
+- **Testing:** Jest
 
 ---
 
