@@ -120,7 +120,7 @@ const viewsOfUsers = async (req, res) => {
     }, 0)
 
 
-    const viewsPerProject = projects.map(p => ({
+    const viewsPerProject = project.map(p => ({
         title: p.title,
         id: p._id,
         views: p.views
@@ -133,10 +133,7 @@ const viewsOfUsers = async (req, res) => {
         viewsPerProject
       });
 
-    res.status(200).json({
-        status: "Successful",
-        message: ""
-    })
+   
 }
 
 module.exports = {getUser, updateUser, deleteUser, viewsOfUsers}
