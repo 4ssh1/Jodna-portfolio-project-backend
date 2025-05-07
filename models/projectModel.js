@@ -27,7 +27,7 @@ const ProjectSchema = mongoose.Schema({
     }, 
     category: {
         type: String,
-        enum: ['all','frontend', 'backend', 'UI/UX Design' ,'fullstack', 'Graphic Design'],
+        enum: ['all','frontend', 'backend', 'ui-ux' ,'fullstack', 'graphic-design'],
         default: 'all'
     },
     technologies: [String],

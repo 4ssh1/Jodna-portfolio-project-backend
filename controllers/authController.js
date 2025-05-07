@@ -110,7 +110,8 @@ const logOutUser = (req, res)=>{
     } catch (error) {
         return res.status(500).json({
             status: "Error",
-            message: "User not logged out"
+            message: "User not logged out",
+            error: error.message
         })
     }
 
@@ -138,11 +139,10 @@ const getSubscribers = async (req, res) => {
         return res.status(500).json({
             status: "Error",
             message: "User not subscribed",
-            err: error.message
+            error: error.message
         })
     }
 }
 
 module.exports = {registerUser, loginUser, logOutUser, getSubscribers}
 
-// 
