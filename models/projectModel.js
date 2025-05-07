@@ -42,6 +42,11 @@ const ProjectSchema = mongoose.Schema({
     isDraft: {
         type: Boolean,
         default: false
+    },
+    createdBy:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     }
 })
 

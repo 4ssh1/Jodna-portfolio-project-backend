@@ -1,4 +1,5 @@
 const User = require('../models/userModel')
+const Project = require('../models/projectModel')
 
 const getUser = async(req, res)=>{
     try {
@@ -30,6 +31,9 @@ const updateUser = async (req, res) => {
     const {id} = req.params
         const user = await User.findById(id)
 
+        // const user = await User.findById(id).select('-password');
+        // the password field is never included in the response
+
         if(!user){
             return res.status(404).json({
                 status: "Error",
@@ -44,19 +48,97 @@ const updateUser = async (req, res) => {
             }
         })
 
-    } catch (error) {
+        await user.save() // runs all validators and pre-save hooks, will trigger pre-save hashing
+
         
+        const userObj = user.toObject({ getters: true });
+        // Convert the Mongoose user document to a plain JavaScript object, 
+        // including virtuals and getters, without affecting the database. 
+        // This ensures the response is clean and frontend-friendly.
+        // does not modify database
+
+        delete userObj.password; // delete is a javascript concept used primarily for objects, not good for arrays
+
+
+        res.status(200).json({
+            status: "Successful",
+            message: "User updated successfully",
+            user: userObj
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            status: "Error",
+            message: "User not updated"
+        })
     }
 }
 
 const deleteUser = async (req, res) => {
+    try {
+        const {id} = req.params
+        const user = await User.findById(id).select('-password')
+    
+        if(!user){
+            return res.status(404).json({
+                    status: "Error",
+                    message: "User not found"
+                }
+            )
+        }
+    
+        await user.deleteOne()  // his version is used after you’ve fetched the document.
+                                // No filter is needed because you already have the exact document .
+                                // This is often used when you want to check the document before deleting.
+    
+        res.status(200).json({
+            status: "Error",
+            message: "User deleted successfully"
+        })       
+    } catch (error) {
+        res.status(500).json({
+            status: "Error",
+            message: "User not deleted"
+        })
+    }
     
 }
 
-const viewsOfUser = async (req, res) => {
-    
+const viewsOfUsers = async (req, res) => {
+    const {id} = req.params
+    const user = User.findById(id)
+    const project = Project.find({createdBy: id})
+
+    if(!user){
+        return res.status(404).json({
+            status: "Error",
+            message: "User not found"
+        })
+    }
+    const totalViews = project.reduce((total, proj)=>{
+        return total += proj.views || 0
+    }, 0)
+
+
+    const viewsPerProject = projects.map(p => ({
+        title: p.title,
+        id: p._id,
+        views: p.views
+      }));
+  
+      res.status(200).json({
+        status: "Success",
+        totalViews,
+        projectCount: project.length,
+        viewsPerProject
+      });
+
+    res.status(200).json({
+        status: "Successful",
+        message: ""
+    })
 }
 
-module.exports = {getUser, updateUser, deleteUser, viewsOfUser}
+module.exports = {getUser, updateUser, deleteUser, viewsOfUsers}
 
 // the admin is the only one that should have access to this routes

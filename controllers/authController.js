@@ -137,7 +137,7 @@ const getSubscribers = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             status: "Error",
-            message: "Server-error",
+            message: "User not subscribed",
             err: error.message
         })
     }
