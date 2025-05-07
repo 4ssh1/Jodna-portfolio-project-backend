@@ -10,19 +10,22 @@ const protect = async (res, req, next)=>{
     })
 
     const verifyUser = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
-    const user = await User.findOne(verifyUser.id).select(-password)
+    const user = await User.findOne({_id: verifyUser.id}).select(-password)
+
+    req.user = await User.findById(decoded._id).select('-password');
 
     if(!user) return res.staus(404).json({
         status: "Error",
         message: "User not found"
     })
 
+    next()
     return res.status(200).json({
         status: "Successful",
         messsage: "User is authorized"
-    })
+    }  
+)
 
-    next()
 
 }
 

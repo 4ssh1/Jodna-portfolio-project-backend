@@ -1,13 +1,14 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
-const {genAccessToken, genRefreshToken, genAccessToken, genRefreshToken} = require('../middlewares/token')
+const {genAccessToken, genRefreshToken} = require('../middlewares/token')
+const Subscriber = require('../models/subscriberModel')
 
 const registerUser = async (req, res)=>{
     try {
-        const {firstname, lastname, email, password} = req.body
+        const {firstname, lastname, email, password, role} = req.body
 
         const user = new User({
-            firstname, lastname, email, password 
+            firstname, lastname, email, password, role 
         })
 
         user.fullname = `${firstname} ${lastname}`
@@ -48,7 +49,7 @@ const registerUser = async (req, res)=>{
 const loginUser = async (req, res)=>{
     try {
         const {email, password} = req.body
-        const user = await User.findOne({email}).select(-password)
+        const user = await User.findOne({email}).select('-password')
 
         if(!user) return res.status(400).json({
             status: "Error",
@@ -115,4 +116,33 @@ const logOutUser = (req, res)=>{
 
 }
 
-module.exports = {registerUser, loginUser, logOutUser}
+const getSubscribers = async (req, res) => {
+    try {
+        const {email} = req.body
+        if(!email){
+            return res.status(404).json({
+                status: "Error",
+                message: "Email is required"
+            })
+        }
+
+        const subscribers = Subscriber.create({email})
+
+        return res.status(201).json({
+            status: "Success",
+            message: "User suscribed successfully",
+            subscribers
+        })
+        
+    } catch (error) {
+        return res.status(500).json({
+            status: "Error",
+            message: "Server-error",
+            err: error.message
+        })
+    }
+}
+
+module.exports = {registerUser, loginUser, logOutUser, getSubscribers}
+
+// 
