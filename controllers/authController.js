@@ -14,7 +14,7 @@ const registerUser = async (req, res)=>{
         user.fullname = `${firstname} ${lastname}`
         const _user = await user.save()
 
-        if(!_user) return res.status(400).json({
+        if(!_user) return res.status(404).json({
             status: "Error",
             message: "Enter all credentials"
         })
@@ -29,7 +29,7 @@ const registerUser = async (req, res)=>{
                     secure: process.env.NODE_ENV === 'production',
                     sameSite: 'strict',
                     maxAge: 7 * 24 * 60 * 60 * 1000
-                }).Userjson({
+                }).json({
                     status: "Successful",
                     message: "User registered successfully",
                     data: {
@@ -51,13 +51,13 @@ const loginUser = async (req, res)=>{
         const {email, password} = req.body
         const user = await User.findOne({email}).select('-password')
 
-        if(!user) return res.status(400).json({
+        if(!user) return res.status(404).json({
             status: "Error",
             message: "Email or password does not exist"
         })
 
         const passwordCheck = await user.isValidatePassword(password)
-        if(!passwordCheck) return res.status(400).json({
+        if(!passwordCheck) return res.status(404).json({
             status: "Error",
             message: "Invalid Email or password"
         })
@@ -72,7 +72,12 @@ const loginUser = async (req, res)=>{
             secure: process.env.NODE_ENV === "production"
         }).json({
             status: "Successful",
-            message: "User logged in successfully"
+            message: "User logged in successfully",
+            data:{
+                user,
+                genAccessToken,
+                refreshToken
+            }
         })
         
     } catch (err) {
@@ -94,12 +99,12 @@ const logOutUser = (req, res)=>{
     try {
         const validToken = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
 
-        if(!validToken) return res.status(200).json({
+        if(!validToken) return res.status(404).json({
             status: "Error",
             message: "Invalid token or token has expired"
         })
 
-        return  res.status(200).clearCookie('refreshToken', {
+        res.status(200).clearCookie('refreshToken', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict'
@@ -132,7 +137,9 @@ const getSubscribers = async (req, res) => {
         return res.status(201).json({
             status: "Success",
             message: "User suscribed successfully",
-            subscribers
+            data:{
+                subscribers
+            }
         })
         
     } catch (error) {

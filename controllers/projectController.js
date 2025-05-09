@@ -32,7 +32,10 @@ const createProject = async (req, res)=>{
 
         return res.status(200).json({
             status: "Successful",
-            message: "Project created successfully"
+            message: "Project created successfully",
+            data:{
+                profile
+            }
         })
         } catch (error) {
             return res.staus(500).json({
@@ -58,7 +61,9 @@ const getDrafts = async (req, res)=>{
         res.status(200).json({
             status: "Successful",
             message: "Drafts retrived successfully",
-            drafts
+            data:{
+                drafts
+            }
         })
         
     } catch (error) {
@@ -84,7 +89,9 @@ const getPublishedProject = async (req, res)=>{
         res.status(200).json({
             staus: "Successful",
             message: "Project retrived successfully",
-            projects
+            data:{
+                projects
+            }
         })
     } catch (error) {
         res.status(500).json({
@@ -120,7 +127,9 @@ const filterProject = async (req, res)=>{
         res.status(200).json({
             status: "Successful",
             message: "Projects found successfully",
-            projects
+            data:{
+                projects
+            }
         })
 
     } catch (error) {

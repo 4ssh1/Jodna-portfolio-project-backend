@@ -15,7 +15,9 @@ const getUser = async(req, res)=>{
         res.status(200).json({
             status: "Successful",
             message: "Users found",
-            count: users.length
+            data:{
+                count: users.length
+            }
         })
     } catch (error) {
         res.status(500).json({
@@ -63,7 +65,9 @@ const updateUser = async (req, res) => {
         res.status(200).json({
             status: "Successful",
             message: "User updated successfully",
-            user: userObj
+            data:{
+                user: userObj
+            }
         })
 
     } catch (error) {
@@ -128,9 +132,11 @@ const viewsOfUsers = async (req, res) => {
   
       res.status(200).json({
         status: "Success",
-        totalViews,
-        projectCount: project.length,
-        viewsPerProject
+        data:{
+            totalViews,
+            projectCount: project.length,
+            viewsPerProject
+        }
       });
 
    
