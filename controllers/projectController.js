@@ -104,16 +104,33 @@ const getPublishedProject = async (req, res)=>{
 
 const filterProject = async (req, res)=>{
     try {
-        const {category} = req.query
+        const {category, technologies, search} = req.query
         let filter = {isDraft: false}
 
         if(category){
             filter.category = category.toLowerCase() // dynamically add filter, If the client sends a query like: '?category=frontend' filter becomes { isDraft: false, category: 'frontend' } 
-        }else{
-            return res.status(404).json({
-                status: "Error",
-                message: "No query"
-            })
+        }
+
+        if(technologies){
+            const techArray = technologies.split(',').map(item=> new RegExp(`^${item}$`, 'i')) ||
+             technologies.split(' ').map(item=> new RegExp(`^${item}$`, 'i'))
+            filter.technologies = {
+                $all: techArray
+            }
+        }
+
+        if(search){
+            filter.$or = [
+                {
+                    title: {
+                        $regex: search, $options: 'i'
+                    }
+                },
+                {
+                    
+                }
+
+            ]
         }
 
         const projects = await Project.find(filter)
@@ -141,7 +158,18 @@ const filterProject = async (req, res)=>{
     }
 }
 
-
+// const projects = await Project.find({
+//     category: 'frontend',
+//     technologies: { $in: ['React', 'Tailwind'] },
+//     isPublished: true,
+//     views: { $gte: 100 },
+//   });
+  
 
 
 module.exports = {createProject, getDrafts, getPublishedProject, filterProject}
+
+// include filter, sort-options
+// likes and comment, follow users,
+// save / bookmark portfolio
+// analytics

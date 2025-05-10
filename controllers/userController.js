@@ -142,6 +142,10 @@ const viewsOfUsers = async (req, res) => {
    
 }
 
+const submitNewsLwtters = async (req, res) => {
+    
+}
+
 module.exports = {getUser, updateUser, deleteUser, viewsOfUsers}
 
 // the admin is the only one that should have access to this routes
