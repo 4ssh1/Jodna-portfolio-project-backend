@@ -151,6 +151,39 @@ const getSubscribers = async (req, res) => {
     }
 }
 
-module.exports = {registerUser, loginUser, logOutUser, getSubscribers}
+const removeSubscribers = async (req, res) => {
+    try {
+        const {subscriberId} = req.params
 
-// add functions to remove subscribers
+        const subscriber = await Subscriber.findById(subscriberId)
+
+        if(!subscriber){
+            return res.status(404).json({
+                status: "Error",
+                message: "Subscriber not found"
+            })
+        }
+
+        await Subscriber.deleteOne({
+            _id: subscriberId
+        })
+
+        res.status(200).json({
+            status: "Successsful",
+            message: "Subcriber removed successfully",
+            details: {
+                subscriber
+            }
+        })
+        
+    } catch (error) {
+         return res.status(500).json({
+            status: "Error",
+            message: "Error removing subscribers",
+            error: error.message
+        })
+    }
+}
+
+module.exports = {registerUser, loginUser, logOutUser, getSubscribers, removeSubscribers}
+

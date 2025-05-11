@@ -57,7 +57,7 @@ const getUser = async(req, res)=>{
 
 const updateUser = async (req, res) => {
     try {
-    const {id} = req.params
+        const {id} = req.params
         const user = await User.findById(id)
 
         // const user = await User.findById(id).select('-password');

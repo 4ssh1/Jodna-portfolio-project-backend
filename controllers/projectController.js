@@ -46,37 +46,7 @@ const createProject = async (req, res)=>{
         }
 }
 
-
-const getDrafts = async (req, res)=>{
-    try {
-        const drafts = await Project.find({isDraft: true})
-
-        if(!drafts || drafts.length === 0){
-            return res.status(404).json({
-                status: "Error",
-                message: "No drafts available",
-            })
-        }
-
-        res.status(200).json({
-            status: "Successful",
-            message: "Drafts retrived successfully",
-            data:{
-                drafts
-            }
-        })
-        
-    } catch (error) {
-        res.status(500).json({
-            status:"Error",
-            message: "Draft not retrived",
-            error: error.message
-        })
-    }
-}
-
-
-const getPublishedProject = async (req, res)=>{
+const getPublishedProjects = async (req, res)=>{
     try {
         const projects = await Project.find({isDraft: false})
         if(!projects || projects.length === 0){
@@ -106,14 +76,14 @@ const filterProject = async (req, res)=>{
     try {
         const {category, technologies, search, user} = req.query
         let filter = {isDraft: false}
-
+        
         if(category){
             filter.category = category.toLowerCase() // dynamically add filter, If the client sends a query like: '?category=frontend' filter becomes { isDraft: false, category: 'frontend' } 
         }
-
+        
         if(technologies){
             const techArray = technologies.split(',').map(item=> new RegExp(`^${item}$`, 'i')) ||
-             technologies.split(' ').map(item=> new RegExp(`^${item}$`, 'i'))
+            technologies.split(' ').map(item=> new RegExp(`^${item}$`, 'i'))
             filter.technologies = {
                 $all: techArray
             }
@@ -132,7 +102,7 @@ const filterProject = async (req, res)=>{
         }
 
         const projects = await Project.find(filter).populate('user', '-passwod')
-
+        
         if(!projects){
             return res.status(404).json({
                 status: "No projects found"
@@ -146,7 +116,7 @@ const filterProject = async (req, res)=>{
                 projects
             }
         })
-
+        
     } catch (error) {
         res.status(500).json({
             status: "Error",
@@ -156,6 +126,151 @@ const filterProject = async (req, res)=>{
     }
 }
 
+const updateProject = async (req, res)=>{
+    try {
+        const {projectId} = req.params
+        const project = Project.findOne({
+            _id: projectId,
+            isDraft: false
+        })
+
+        if(!project){
+            return res.status(404).json({
+                status: "Error",
+                message: "Project not found"
+            })
+        }
+
+        if(project.user.toString() !== req.user._id.toString()){
+            return res.staus(403).json({
+                status: "Error",
+                message: "User not authorised"
+            })
+        }
+
+        const allowedUpdates = ['title', 'description', 'user', 'githubLink', 'liveLink', 'imageUrl', 'category', 'technologies', 'bio', 'views', 'isDraft'];
+        allowedUpdates.forEach(field =>{
+            if(req.body[field] !== undefined){
+                project[field] = req.body[field]
+            }
+        })
+
+        const updated = await project.save()
+        const updatedProject = updated.toObject()
+
+        res.status(200).json({
+            status: "Successful",
+            message: "Project updated successfully",
+            details:{
+                updatedProject
+            }
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            status:"Error",
+            message: "Error updating project",
+            error: error.message
+        })
+    }
+}
+
+const deleteProject = async (req, res)=>{
+    try {
+      const {projectId} = req.params
+      const project = await Project.findById(projectId) 
+      
+      if(!project){
+        return res.status(404).json({
+            status: "Error",
+            message: "Project not found"
+        })
+      }
+
+      const deleted = await project.deleteOne()
+
+      res.status(200).json({
+        status: "Successful",
+        message: "Project deleted successfully",
+        details: {
+            deleted
+        }
+      })
+
+    } catch (error) {
+        res.status(500).json({
+            status:"Error",
+            message: "Error deleting project",
+            error: error.message
+        })   
+    }
+}
+
+const getDrafts = async (req, res)=>{
+    try {
+        const drafts = await Project.find({isDraft: true})
+
+        if(!drafts || drafts.length === 0){
+            return res.status(404).json({
+                status: "Error",
+                message: "No drafts available",
+            })
+        }
+
+        res.status(200).json({
+            status: "Successful",
+            message: "Drafts retrived successfully",
+            data:{
+                drafts
+            }
+        })
+        
+    } catch (error) {
+        res.status(500).json({
+            status:"Error",
+            message: "Draft not retrived",
+            error: error.message
+        })
+    }
+}
+
+const deleteDraft = async (req, res)=>{
+    try {
+        const {draftId} = req.params
+        const draft = await Project.findOne({
+            _id: draftId,
+            isDraft: true
+        })
+
+        if(!draft){
+            return res.status(404).json({
+                status: "Error",
+                message: "Draft not found"
+            })
+        }
+
+        const deleted = await draft.deleteOne()
+
+        // const deleted = await Project.deleteOne({
+        //     _id: draftId,
+        //     isDraft: true
+        // }) this does a second call to the database so the above is better
+
+        res.status(200).json({
+            status: "Successful",
+            message: "Draft deleted successfully",
+            details:{
+                deleted
+            }
+        })
+    } catch (error) {
+       res.status(500).json({
+            status:"Error",
+            message: "Error deleting drafts",
+            error: error.message
+        }) 
+    }
+}
 
 
 // const projects = await Project.find({
@@ -167,7 +282,6 @@ const filterProject = async (req, res)=>{
   
 
 
-module.exports = {createProject, getDrafts, getPublishedProject, filterProject}
+module.exports = {createProject, getDrafts, deleteDraft, getPublishedProjects, filterProject, updateProject, deleteProject}
 
 // analytics
-// CRUD operations for project
