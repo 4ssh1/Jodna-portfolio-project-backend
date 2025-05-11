@@ -1,11 +1,38 @@
 const User = require('../models/userModel')
 const Project = require('../models/projectModel')
+const Subscriber = require('../models/subscriberModel') 
 
-const getUser = async(req, res)=>{
+const getAllUser = async(req, res)=>{
     try {
         const users = await User.find().select('-password')
         // find() returns an array whether empty or notxxxxx
         // findOne() returns an object
+
+        if(!users) return res.status(404).json({
+            status: "Error",
+            message: "User not found"
+        })
+
+        res.status(200).json({
+            status: "Successful",
+            message: "Users found",
+            data:{
+                count: users.length
+            }
+        })
+    } catch (error) {
+        res.status(500).json({
+            status: "Error",
+            message: "Server error",
+            err: error.message
+        })
+    }
+}
+
+const getUser = async(req, res)=>{
+    try {
+        const email = req.body
+        const users = await User.findOne({email}).select('-password')
 
         if(!users) return res.status(404).json({
             status: "Error",
@@ -142,10 +169,10 @@ const viewsOfUsers = async (req, res) => {
    
 }
 
-const submitNewsLwtters = async (req, res) => {
+const submitNewsLetters = async (req, res) => {
     
 }
 
-module.exports = {getUser, updateUser, deleteUser, viewsOfUsers}
+module.exports = {getUser, updateUser, deleteUser, viewsOfUsers, getAllUser}
 
 // the admin is the only one that should have access to this routes

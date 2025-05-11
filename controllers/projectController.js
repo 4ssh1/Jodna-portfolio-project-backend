@@ -104,7 +104,7 @@ const getPublishedProject = async (req, res)=>{
 
 const filterProject = async (req, res)=>{
     try {
-        const {category, technologies, search} = req.query
+        const {category, technologies, search, user} = req.query
         let filter = {isDraft: false}
 
         if(category){
@@ -121,19 +121,17 @@ const filterProject = async (req, res)=>{
 
         if(search){
             filter.$or = [
-                {
-                    title: {
-                        $regex: search, $options: 'i'
-                    }
-                },
-                {
-                    
-                }
-
+                { title: {$regex: search, $options: 'i'}},
+                {category: {$regex: search, $options: 'i'}},
+                {technologies: {$elemMatch: search, $options: 'i'}}
             ]
         }
 
-        const projects = await Project.find(filter)
+        if(user){
+            filter.user = user
+        }
+
+        const projects = await Project.find(filter).populate('user', '-passwod')
 
         if(!projects){
             return res.status(404).json({
@@ -158,6 +156,8 @@ const filterProject = async (req, res)=>{
     }
 }
 
+
+
 // const projects = await Project.find({
 //     category: 'frontend',
 //     technologies: { $in: ['React', 'Tailwind'] },
@@ -169,7 +169,7 @@ const filterProject = async (req, res)=>{
 
 module.exports = {createProject, getDrafts, getPublishedProject, filterProject}
 
-// include filter, sort-options
 // likes and comment, follow users,
 // save / bookmark portfolio
 // analytics
+// CRUD operations for project
