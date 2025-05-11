@@ -49,6 +49,7 @@ const createProject = async (req, res)=>{
 const getPublishedProjects = async (req, res)=>{
     try {
         const projects = await Project.find({isDraft: false})
+
         if(!projects || projects.length === 0){
             return res.status(404).json({
                 status: "Error",
@@ -64,7 +65,7 @@ const getPublishedProjects = async (req, res)=>{
             }
         })
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             status: "Error",
             message: "Projects not retrived",
             error: error.message
@@ -118,7 +119,7 @@ const filterProject = async (req, res)=>{
         })
         
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             status: "Error",
             message: "Projects not retrived by filtering",
             error: error.message
@@ -161,13 +162,13 @@ const updateProject = async (req, res)=>{
         res.status(200).json({
             status: "Successful",
             message: "Project updated successfully",
-            details:{
+            data:{
                 updatedProject
             }
         })
 
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             status:"Error",
             message: "Error updating project",
             error: error.message
@@ -192,13 +193,13 @@ const deleteProject = async (req, res)=>{
       res.status(200).json({
         status: "Successful",
         message: "Project deleted successfully",
-        details: {
+        data: {
             deleted
         }
       })
 
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             status:"Error",
             message: "Error deleting project",
             error: error.message
@@ -226,7 +227,7 @@ const getDrafts = async (req, res)=>{
         })
         
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             status:"Error",
             message: "Draft not retrived",
             error: error.message
@@ -259,7 +260,7 @@ const deleteDraft = async (req, res)=>{
         res.status(200).json({
             status: "Successful",
             message: "Draft deleted successfully",
-            details:{
+            data:{
                 deleted
             }
         })

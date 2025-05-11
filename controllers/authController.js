@@ -171,7 +171,7 @@ const removeSubscribers = async (req, res) => {
         res.status(200).json({
             status: "Successsful",
             message: "Subcriber removed successfully",
-            details: {
+            data: {
                 subscriber
             }
         })

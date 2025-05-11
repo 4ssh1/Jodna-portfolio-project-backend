@@ -26,13 +26,16 @@ const LikePortfolio = async (req, res)=>{
                 message: "Like removed"
             })
         }else{
-            await Likes.create({
+            const userLiked = await Likes.create({
             user: userId,
             portfolio: projectId
         })
         res.status(201).json({
             status: "Successful",
             message: "Successfully liked portfolio",
+            data: {
+                userLiked
+            }
         })
         }
     } catch (error) {
@@ -66,14 +69,17 @@ const BookMarkPortfolio = async (req, res) => {
                 message: "Bookmark removed"
             })
         }else{
-            await BookMark.create({
+            const userbookmarked = await BookMark.create({
             user: userId,
             portfolio: projectId
         })
     
             return res.status(200).json({
                  status: "Successful",
-                message: "Bookmarked successfully"
+                 message: "Bookmarked successfully",
+                 data: {
+                    userbookmarked
+                 }
             })
     }
     } catch (error) {
@@ -107,13 +113,16 @@ const FollowPortfolio = async (req, res) => {
                 message: "Bookmark removed"
             })
         }else{
-            await Follows.create({
+            const userFollow = await Follows.create({
             user: userId,
             portfolio: projectId
         })
             return res.status(200).json({
                  status: "Successful",
-                message: "Bookmarked successfully"
+                 message: "Bookmarked successfully",
+                 data: {
+                    userFollow
+                 }
             })
     }
     } catch (error) {
@@ -143,7 +152,7 @@ const createComment = async (req, res) => {
         res.status(200).json({
             status: "Successful",
             message: "Commented successfully",
-            details:{
+            data:{
                 comment
             }
         })
@@ -170,7 +179,7 @@ const getComments = async (req, res) => {
     res.status(200).json({
         status: "Successful",
         message: "User commented successfully",
-        details:{
+        data:{
             comments
         }
     })
@@ -208,7 +217,7 @@ const updateComment = async (req, res)=>{
         res.status(200).json({
             status: "Successful",
             message: "Comment edited successfully",
-            details:{
+            data:{
                 comment
             }
         })
