@@ -153,3 +153,4 @@ const getSubscribers = async (req, res) => {
 
 module.exports = {registerUser, loginUser, logOutUser, getSubscribers}
 
+// add functions to remove subscribers

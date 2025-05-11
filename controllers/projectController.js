@@ -169,7 +169,5 @@ const filterProject = async (req, res)=>{
 
 module.exports = {createProject, getDrafts, getPublishedProject, filterProject}
 
-// likes and comment, follow users,
-// save / bookmark portfolio
 // analytics
 // CRUD operations for project
