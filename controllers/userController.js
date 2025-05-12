@@ -200,9 +200,7 @@ const uploadProfilePicture = async (req, res) => {
 
 
 
-const submitNewsLetters = async (req, res) => {
-    
-}
+
 
 module.exports = {getUser, updateUser, deleteUser, viewsOfUsers, getAllUser, uploadProfilePicture}
 

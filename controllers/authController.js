@@ -3,6 +3,7 @@ const User = require('../models/userModel')
 const Project = require('../models/projectModel')
 const {genAccessToken, genRefreshToken} = require('../middlewares/token')
 const Subscriber = require('../models/subscriberModel')
+const sendEmail = require('../utils/emailService');
 
 const registerUser = async (req, res)=>{
     try {
@@ -217,5 +218,35 @@ const refreshToken = async (req, res)=>{
     }
 }
 
-module.exports = {registerUser, loginUser, logOutUser, getSubscribers, removeSubscribers, refreshToken}
+const addSubscriber = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const existing = await Subscriber.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: 'Already subscribed' });
+    }
+
+    const subscriber = await Subscriber.create({ email });
+
+    // Send welcome email
+    await sendEmail(
+      email,
+      'Thanks for Subscribing!',
+      `<h2>Welcome!</h2><p>You’re now subscribed to our updates 🎉</p>`
+    );
+
+    res.status(201).json({
+      status: "Successful",
+      message: 'Subscribed successfully, email sent!',
+      data: {
+        subscriber
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Subscription failed', error: error.message });
+  }
+};
+
+module.exports = {registerUser, loginUser, logOutUser, getSubscribers, removeSubscribers, refreshToken, addSubscriber}
 
