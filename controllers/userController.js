@@ -1,6 +1,8 @@
 const User = require('../models/userModel')
 const Project = require('../models/projectModel')
 const Subscriber = require('../models/subscriberModel') 
+const uploadToCloudinary = require('../utils/cloudinary') 
+const {handleError} = require('../utils/helpers/serverErrorHandler')
 
 const getAllUser = async(req, res)=>{
     try {
@@ -169,10 +171,38 @@ const viewsOfUsers = async (req, res) => {
    
 }
 
+const uploadProfilePicture = async (req, res) => {
+  try {
+    // Extract the file buffer from req.file (using multer memoryStorage)
+    const { buffer } = req.file;
+
+    // Upload the image to Cloudinary using the utility function
+    const result = await uploadToCloudinary(buffer, 'profile_pictures');
+
+    // Store the URL of the uploaded image in the user's profile
+    const updatedProfile = await User.findOneAndUpdate(
+       req.user._id ,  // Assuming you're using a user identifier from your auth middleware
+      { profilePic: result.secure_url },
+      { new: true }
+    );
+
+    // Send back the updated profile with the image URL
+    res.status(200).json({
+      message: "Profile picture updated successfully",
+      profile: updatedProfile,
+      imageUrl: result.secure_url,
+    });
+    
+  } catch (error) {
+    return handleError(res, error,"Error uploading profile picture" )
+  }
+};
+
+
+
 const submitNewsLetters = async (req, res) => {
     
 }
 
-module.exports = {getUser, updateUser, deleteUser, viewsOfUsers, getAllUser}
+module.exports = {getUser, updateUser, deleteUser, viewsOfUsers, getAllUser, uploadProfilePicture}
 
-// the admin is the only one that should have access to this routes

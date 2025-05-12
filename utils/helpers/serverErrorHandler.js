@@ -6,7 +6,7 @@ const handleError = (res, error, message = "Server Error", statusCode = 500) => 
     });
   };
   
-  module.exports = handleError;
+  module.exports = {handleError}
   
 
   // to use 

@@ -1,4 +1,5 @@
 const Project = require('../models/projectModel')
+const uploadToCloudinary = require('../utils/cloudinary')
 
 const createProject = async (req, res)=>{
     try {
@@ -149,7 +150,8 @@ const updateProject = async (req, res)=>{
             })
         }
 
-        const allowedUpdates = ['title', 'description', 'user', 'githubLink', 'liveLink', 'imageUrl', 'category', 'technologies', 'bio', 'views', 'isDraft'];
+        const allowedUpdates = ['title', 'description', 'user', 'githubLink', 'liveLink', 'imageUrl', 
+            'category', 'technologies', 'bio', 'views', 'isDraft'];
         allowedUpdates.forEach(field =>{
             if(req.body[field] !== undefined){
                 project[field] = req.body[field]
@@ -273,6 +275,34 @@ const deleteDraft = async (req, res)=>{
     }
 }
 
+const uploadProjectPicture = async (req, res) =>{
+    try {
+      // Extract the file buffer from req.file (using multer memoryStorage)
+      const { buffer } = req.file;
+  
+      // Upload the image to Cloudinary using the utility function
+      const result = await uploadToCloudinary(buffer, 'project_images');
+  
+      // Store the URL of the uploaded image in the user's profile
+      const updatedProject = await Project.findByIdAndUpdate(
+        req.params.projectId,
+        { imageUrl: result.secure_url },
+        { new: true }
+        );
+  
+      // Send back the updated profile with the image URL
+      res.status(200).json({
+      status: 'Success',
+      message: 'Project image uploaded successfully',
+      imageUrl: result.secure_url,
+      });
+      
+    } catch (error) {
+      return handleError(res, error,"Error uploading profile picture" )
+    }
+
+}
+
 
 // const projects = await Project.find({
 //     category: 'frontend',
@@ -283,6 +313,7 @@ const deleteDraft = async (req, res)=>{
   
 
 
-module.exports = {createProject, getDrafts, deleteDraft, getPublishedProjects, filterProject, updateProject, deleteProject}
+module.exports = {createProject, getDrafts, deleteDraft, getPublishedProjects,
+     filterProject, updateProject, deleteProject, uploadProjectPicture}
 
 // analytics
