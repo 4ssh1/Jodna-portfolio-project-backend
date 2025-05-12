@@ -264,4 +264,3 @@ module.exports = {
     LikePortfolio, BookMarkPortfolio, FollowPortfolio, createComment, getComments, updateComment, deleteComment
 }
 
-// crud operations for comments
