@@ -24,4 +24,3 @@ const genRefreshToken = (user)=>{
 
 module.exports = {genAccessToken, genRefreshToken}
 
-// write a function to regenerate token when it expires

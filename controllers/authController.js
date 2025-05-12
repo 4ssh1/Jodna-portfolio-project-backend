@@ -1,28 +1,27 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
+const Project = require('../models/projectModel')
 const {genAccessToken, genRefreshToken} = require('../middlewares/token')
 const Subscriber = require('../models/subscriberModel')
 
 const registerUser = async (req, res)=>{
     try {
-        const {firstname, lastname, email, password, role} = req.body
+        const {firstname, lastname, email, password} = req.body
 
         const user = new User({
-            firstname, lastname, email, password, role 
+            firstname, lastname, email, password
         })
 
         user.fullname = `${firstname} ${lastname}`
-        const _user = await user.save()
 
-        if(!_user) return res.status(404).json({
-            status: "Error",
-            message: "Enter all credentials"
-        })
+        const _user = await user.save()  // without the _user variable i would be able to use user in the respective places as it alters user
 
-        const accessToken = genAccessToken(user)
-        const refreshToken = genRefreshToken(user)
+        await Project.create({ user: _user._id });
 
-        user.password = undefined
+        const accessToken = genAccessToken(_user)
+        const refreshToken = genRefreshToken(_user)
+
+        _user.password = undefined
 
             return res.status(200).cookie('refreshToken', refreshToken, {
                     httpOnly: true,
@@ -33,7 +32,7 @@ const registerUser = async (req, res)=>{
                     status: "Successful",
                     message: "User registered successfully",
                     data: {
-                        user, accessToken, refreshToken
+                        _user, accessToken, refreshToken
                     }
                 })
             
@@ -185,5 +184,38 @@ const removeSubscribers = async (req, res) => {
     }
 }
 
-module.exports = {registerUser, loginUser, logOutUser, getSubscribers, removeSubscribers}
+const refreshToken = async (req, res)=>{
+    try {
+        const token = req.cookies.refreshToken
+        if (!token) return res.status(401).json({
+            status: "Error",
+            message: "Not authorized"
+        })
+
+        const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+        const user = await User.findById(payload.id)
+        if (!user) return res.status(403).json({
+            status: "Error",
+            message: "User not found"
+        })
+
+        const accessToken = genAccessToken(user)
+        const refreshToken = genRefreshToken(user)
+
+        res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        res.json({ accessToken });
+
+    } catch (error) {
+        res.status(403).json({ message: 'Invalid or expired refresh token' });
+ 
+    }
+}
+
+module.exports = {registerUser, loginUser, logOutUser, getSubscribers, removeSubscribers, refreshToken}
 
