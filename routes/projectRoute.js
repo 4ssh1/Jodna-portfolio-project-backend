@@ -21,3 +21,6 @@ projectRouter.patch('/profile-picture', protect, rateLimiter ,upload.single('ima
              .get('/comment', getComments)
              .patch('/update-comment/:id', protect, updateComment)
              .delete('/delete-comment/:id', protect, deleteComment)
+
+
+module.exports = projectRouter

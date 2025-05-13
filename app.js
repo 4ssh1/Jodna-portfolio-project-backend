@@ -4,6 +4,10 @@ const mongoose = require('mongoose')
 const cookie = require('cookie-parser')
 const cors = require('cors')
 
+const userRoutes = require('./routes/userRoute')
+const profileRoutes = require('./routes/profileRoute')
+const projectRoutes = require('./routes/projectRoute')
+
 const PORT = process.env.PORT
 const app = express()
 
@@ -15,6 +19,10 @@ app.use(cookie())
 app.get('/', (req, res)=>{
     res.send("Hello World")
 })
+
+app.use('/api/user', userRoutes)
+app.use('/api/project', projectRoutes)
+app.use('/api/profile', profileRoutes)
 
 // 404 handler for unmatched routes
 // app.use((req, res, next) => {
