@@ -74,6 +74,25 @@ const getPublishedProjects = async (req, res)=>{
     }
 }
 
+const getProject = async (req, res) => {
+    try {
+        const {projectId} = req.params
+        const project = await Project.findByIdAndUpdate(
+      projectId,
+      { $inc: { views: 1 } }, // Increment views by 1
+      { new: true }
+    );
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    res.status(200).json({ project });
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving project', error: error.message });
+  }
+}
+
 const filterProject = async (req, res)=>{
     try {
         const {category, technologies, search, user} = req.query
@@ -237,6 +256,19 @@ const getDrafts = async (req, res)=>{
     }
 }
 
+const getDraft = async (req, res) => {
+    try {
+        const {projectId} = req.params
+        const project = await Project.findById(projectId)
+        if (!project) {
+        return res.status(404).json({ message: 'Project not found' });
+        }
+        res.status(200).json({ project });
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving project', error: error.message });
+  }
+}
+
 const deleteDraft = async (req, res)=>{
     try {
         const {draftId} = req.params
@@ -313,7 +345,7 @@ const uploadProjectPicture = async (req, res) =>{
   
 
 
-module.exports = {createProject, getDrafts, deleteDraft, getPublishedProjects,
-     filterProject, updateProject, deleteProject, uploadProjectPicture}
+module.exports = {createProject, getDrafts, deleteDraft, getPublishedProjects, getProject,
+     filterProject, updateProject, deleteProject, uploadProjectPicture, getDraft}
 
 // analytics

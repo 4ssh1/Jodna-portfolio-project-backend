@@ -2,8 +2,10 @@ const express = require('express')
 const projectRouter = express.Router()
 const {protect} = require('../middlewares/protect')
 const rateLimiter = require('../middlewares/rateLimiter')
-const { likePortfolio, bookMarkPortfolio, followPortfolio, createComment, getComments, updateComment, deleteComment } = require('../controllers/engagementController')
-const { uploadProjectPicture, createProject, getDrafts, deleteDraft, getPublishedProjects, filterProject, updateProject, deleteProject} = require('../controllers/projectController')
+const { likePortfolio, bookMarkPortfolio, followPortfolio, createComment, 
+    getComments, updateComment, deleteComment } = require('../controllers/engagementController')
+const { uploadProjectPicture, createProject, getDrafts, deleteDraft, getDraft, getProject,
+    getPublishedProjects, filterProject, updateProject, deleteProject} = require('../controllers/projectController')
 const upload = require('../utils/multer')
 
 projectRouter.patch('/profile-picture', protect, rateLimiter ,upload.single('image'),uploadProjectPicture)
@@ -21,6 +23,8 @@ projectRouter.patch('/profile-picture', protect, rateLimiter ,upload.single('ima
              .get('/comment', getComments)
              .patch('/update-comment/:id', protect, updateComment)
              .delete('/delete-comment/:id', protect, deleteComment)
+             .get('/draft', protect, getDraft)
+             .get('/project', getProject)
 
 
 module.exports = projectRouter
