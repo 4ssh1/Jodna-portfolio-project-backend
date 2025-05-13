@@ -246,7 +246,18 @@ const addSubscriber = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: 'Subscription failed', error: error.message });
   }
-};
+}
 
-module.exports = {registerUser, loginUser, logOutUser, getSubscribers, removeSubscribers, refreshToken, addSubscriber}
+const authorise = async (req, res, next) => {
+    const user = req.user;
+    if(user.role !== "admin"){
+        return res.status(401).json({
+            status: "failed",
+            message: "you are not authorised"
+        })
+    }
+    next()
+}
+
+module.exports = {registerUser, loginUser, logOutUser, getSubscribers, removeSubscribers, refreshToken, addSubscriber, authorise}
 

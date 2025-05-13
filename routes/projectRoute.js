@@ -1,7 +1,23 @@
-// router.put(
-//   '/profile-picture',
-//   authMiddleware,
-//   uploadLimiter,
-//   upload.single('image'),
-//   uploadProfilePictureController
-// );
+const express = require('express')
+const projectRouter = express.Router()
+const {protect} = require('../middlewares/protect')
+const rateLimiter = require('../middlewares/rateLimiter')
+const { likePortfolio, bookMarkPortfolio, followPortfolio, createComment, getComments, updateComment, deleteComment } = require('../controllers/engagementController')
+const { uploadProjectPicture, createProject, getDrafts, deleteDraft, getPublishedProjects, filterProject, updateProject, deleteProject} = require('../controllers/projectController')
+const upload = require('../utils/multer')
+
+projectRouter.patch('/profile-picture', protect, rateLimiter ,upload.single('image'),uploadProjectPicture)
+             .post('/create', protect, createProject)
+             .delete('/delete/:id', protect, deleteProject)
+             .delete('/delete-draft/:id', protect, deleteDraft)
+             .get('/projects', getPublishedProjects)
+             .get('/search', filterProject)
+             .patch('update/:id', protect, updateProject)
+             .get('/drafts', protect, getDrafts)
+             .post('/like', protect, likePortfolio)
+             .post('/bookmark', protect, bookMarkPortfolio)
+             .post('/follow', protect, followPortfolio)
+             .post('/create-comment', protect, createComment)
+             .get('/comment', getComments)
+             .patch('/update-comment/:id', protect, updateComment)
+             .delete('/delete-comment/:id', protect, deleteComment)

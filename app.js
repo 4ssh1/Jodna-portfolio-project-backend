@@ -16,6 +16,15 @@ app.get('/', (req, res)=>{
     res.send("Hello World")
 })
 
+// 404 handler for unmatched routes
+// app.use((req, res, next) => {
+//   res.status(404).json({
+//     status: 'Error',
+//     message: 'Route not found'
+//   });
+// });
+
+
 mongoose.connect(process.env.DATABASE_URL || "mongodb://localhost:27017/portfolio")
         .then(console.log("DB connected successfully")) 
         .catch(err=>console.log(err))   

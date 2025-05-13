@@ -1,7 +1,7 @@
 const {BookMark, Follows, Likes, Comment} = require('../models/engagementModel')
 const handleError = require('../utils/helpers/serverErrorHandler')
 
-const LikePortfolio = async (req, res)=>{
+const likePortfolio = async (req, res)=>{
     try {
         const {projectId} = req.params
         const userId = req.user._id
@@ -43,7 +43,7 @@ const LikePortfolio = async (req, res)=>{
     }
 }
 
-const BookMarkPortfolio = async (req, res) => {
+const bookMarkPortfolio = async (req, res) => {
     try { 
         const userId = req.user._id
         const {projectId} = req.params
@@ -87,7 +87,7 @@ const BookMarkPortfolio = async (req, res) => {
     }
 }
 
-const FollowPortfolio = async (req, res) => {
+const followPortfolio = async (req, res) => {
     try { 
         const userId = req.user._id
         const {projectId} = req.params
@@ -261,6 +261,6 @@ const deleteComment = async (req, res) => {
 }
 
 module.exports = {
-    LikePortfolio, BookMarkPortfolio, FollowPortfolio, createComment, getComments, updateComment, deleteComment
+    likePortfolio, bookMarkPortfolio, followPortfolio, createComment, getComments, updateComment, deleteComment
 }
 

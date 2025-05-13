@@ -13,7 +13,9 @@ const upload = multer({
       cb(new Error("Only image files are allowed!"), false);
     }
   }
-});
+})
+
+module.exports = upload;\
 
 // Even if a file has a .png or .jpeg extension, Multer doesn't trust file extensions alone. It checks the MIME type that 
 // the browser or HTTP client sends during upload, which should correctly indicate whether it's truly an image.
@@ -26,6 +28,5 @@ const upload = multer({
 // the HTTP request (which a browser usually doesn't allow). 
 //Prevents non-image files (e.g., .exe, .zip, .pdf) from being uploaded
 
-module.exports = upload;
 
 

@@ -3,7 +3,7 @@ const uploadToCloudinary = require('../utils/cloudinary')
 
 const createProject = async (req, res)=>{
     try {
-        const { title, description, githubLink, liveLink, imageUrl, category, technologies, bio, isDraft } = req.body
+        const { title, description, githubLink, liveLink, category, technologies, bio, isDraft } = req.body
 
         const requiredFields = {
             title: "Title is required",
