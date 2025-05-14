@@ -1,5 +1,8 @@
 const {BookMark, Follows, Likes, Comment} = require('../models/engagementModel')
 const handleError = require('../utils/helpers/serverErrorHandler')
+const connectedUsers = require('../app')
+const Project = require('../models/projectModel')
+const User = require('../models/userModel')
 
 const likePortfolio = async (req, res)=>{
     try {
@@ -17,6 +20,8 @@ const likePortfolio = async (req, res)=>{
             user: userId,
             portfolio: projectId
         })
+
+        
         if(prevLiked){
             await Likes.deleteOne({
                 _id: prevLiked._id
@@ -27,9 +32,25 @@ const likePortfolio = async (req, res)=>{
             })
         }else{
             const userLiked = await Likes.create({
-            user: userId,
-            portfolio: projectId
-        })
+                user: userId,
+                portfolio: projectId
+            })
+            
+            const io = req.app.get('io')
+            const project = await Project.findById(projectId).populate('user', '_id')
+            const ownerId = project.user._id.toString()
+            const liker = await User.findById(userId).select('name')
+            const socketId = connectedUsers[ownerId]
+
+        if(socketId){
+            io.to(socketId).emit('notification', {
+                type: 'like',
+                message: `A ${liker.name} liked your portfolio`,
+                projectId: projectId,
+                userId: userId
+            })
+        }
+
         res.status(201).json({
             status: "Successful",
             message: "Successfully liked portfolio",
@@ -58,8 +79,8 @@ const bookMarkPortfolio = async (req, res) => {
         const prevBookmarked = await BookMark.findOne({
             user: userId,
             portfolio: projectId
-        })
-    
+        })      
+        
         if(prevBookmarked){
             await BookMark.deleteOne({
                 _id : prevBookmarked._id
@@ -70,17 +91,31 @@ const bookMarkPortfolio = async (req, res) => {
             })
         }else{
             const userbookmarked = await BookMark.create({
-            user: userId,
-            portfolio: projectId
-        })
-    
-            return res.status(200).json({
-                 status: "Successful",
-                 message: "Bookmarked successfully",
-                 data: {
-                    userbookmarked
-                 }
+                user: userId,
+                portfolio: projectId
             })
+            
+            const io = req.app.get('io')
+            const project = await Project.findById(projectId).populate('user', '_id')
+            const ownerId = project.user._id.toString()
+            const liker = await User.findById(userId).select('name')
+            const socketId = connectedUsers[ownerId]
+
+            if(socketId){
+                io.to(socketId).emit('notification', {
+                    type: 'bookmark',
+                    message: `A ${liker.name} bookmarked your portfolio`,
+                    projectId: projectId,
+                })
+            }      
+    
+        return res.status(200).json({
+            status: "Successful",
+            message: "Bookmarked successfully",
+            data: {
+                userbookmarked
+            }
+        })
     }
     } catch (error) {
         return handleError(res, error, "User had error bookmarking project");
@@ -103,7 +138,7 @@ const followPortfolio = async (req, res) => {
             user: userId,
             portfolio: projectId
         })
-    
+        
         if(prevFollowed){
             await Follows.deleteOne({
                 _id : prevFollowed._id
@@ -114,16 +149,30 @@ const followPortfolio = async (req, res) => {
             })
         }else{
             const userFollow = await Follows.create({
-            user: userId,
-            portfolio: projectId
-        })
-            return res.status(200).json({
-                 status: "Successful",
-                 message: "Bookmarked successfully",
-                 data: {
-                    userFollow
-                 }
+                user: userId,
+                portfolio: projectId
             })
+            
+            const io = req.app.get('io')
+            const project = await Project.findById(projectId).populate('user', '_id')
+            const ownerId = project.user._id.toString()
+            const liker = await User.findById(userId).select('name')
+            const socketId = connectedUsers[ownerId]        
+
+        if(socketId){
+            io.to(socketId).emit('notification', {
+            type: 'follow',
+            message: `A ${liker.name} followed your portfolio`,
+            projectId: projectId,
+            })
+        }     
+        return res.status(200).json({
+            status: "Successful",
+            message: "followed successfully",
+            data: {
+                userFollow
+            }
+        })
     }
     } catch (error) {
         return handleError(res, error, "User couldn't follow");        
@@ -148,6 +197,20 @@ const createComment = async (req, res) => {
             portfolio: projectId,
             text
         })
+
+        const io = req.app.get('io')
+        const project = await Project.findById(projectId).populate('user', '_id')
+        const ownerId = project.user._id.toString()
+        const liker = await User.findById(userId).select('name')
+        const socketId = connectedUsers[ownerId]        
+
+        if(socketId){
+            io.to(socketId).emit('notification', {
+            type: 'comment',
+            message: `A ${liker.name} commented your portfolio`,
+            projectId: projectId,
+            })
+        }   
 
         res.status(200).json({
             status: "Successful",
