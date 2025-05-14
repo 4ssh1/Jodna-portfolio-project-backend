@@ -13,10 +13,11 @@ A portfolio builder that allows users to register, upload projects, showcase ski
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB (Mongoose ODM)
 - **Authentication:** JWT, bcrypt
-- **File Uploads:** Cloudinary
+- **File Uploads:** Cloudinary, multer
 - **Email Service:** Nodemailer
 - **API Docs:** Swagger (Live Docs)
 - **Testing:** Jest
+- **Notifications:** Web socket
 
 ---
 
@@ -65,21 +66,23 @@ To get started, follow these steps:
 app.js
 config
 ├── cloudinaryConfig.js
-├── db.js
 controllers
 ├── authController.js
+├── engagementController.js
 ├── projectController.js
-├── searchController.js
 ├── userController.js
 middlewares
 ├── protect.js
+├── rateLimiter.js
 ├── token.js
 models
+├── engagementModel.js
 ├── projectModel.js
 ├── subscriberModel.js
 ├── userModel.js
 package-lock.json
 package.json
+README.md
 routes
 ├── profileRoute.js
 ├── projectRoute.js
@@ -93,7 +96,9 @@ tests
 utils
 ├── cloudinary.js
 ├── emailService.js
-├── jwtService.js
+├── helpers
+│   ├── serverErrorHandler.js
+├── multer.js
 ```
 
 ---
