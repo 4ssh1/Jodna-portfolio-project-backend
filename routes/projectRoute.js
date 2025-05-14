@@ -1,6 +1,6 @@
 const express = require('express')
 const projectRouter = express.Router()
-const {protect} = require('../middlewares/protect')
+const protect = require('../middlewares/protect')
 const rateLimiter = require('../middlewares/rateLimiter')
 const { likePortfolio, bookMarkPortfolio, followPortfolio, createComment, 
     getComments, updateComment, deleteComment } = require('../controllers/engagementController')

@@ -15,7 +15,7 @@ const upload = multer({
   }
 })
 
-module.exports = upload;\
+module.exports = upload
 
 // Even if a file has a .png or .jpeg extension, Multer doesn't trust file extensions alone. It checks the MIME type that 
 // the browser or HTTP client sends during upload, which should correctly indicate whether it's truly an image.

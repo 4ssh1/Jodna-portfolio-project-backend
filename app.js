@@ -21,7 +21,7 @@ const io = new Server(server, {
     }
 })
 
-export const connectedUsers = {};
+const connectedUsers = {};
 
 io.on('connection', (socket)=>{
     console.log("New client connected: ", socket.id)
@@ -80,3 +80,6 @@ mongoose.connect(process.env.DATABASE_URL || "mongodb://localhost:27017/portfoli
 server.listen(PORT, ()=>{
     console.log('server is running at http://localhost:' + PORT)
 })
+
+
+module.exports = {connectedUsers}
