@@ -10,7 +10,8 @@ userRouter.post('/login', loginUser)
           .get('/subscribers', authorise, getSubscribers)
           .get('all-users', authorise, getAllUser)
           .get('views', viewsOfUsers)
-          .post('refresh-token', refreshToken)
+          .post('refresh-token', protect, refreshToken)
           .post('add-subscribers', protect, addSubscriber)
+          .post('/remove-subscribers', protect, removeSubscribers)
 
 module.exports = userRouter

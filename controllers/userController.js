@@ -33,8 +33,15 @@ const getAllUser = async(req, res)=>{
 
 const getUser = async(req, res)=>{
     try {
-        const email = req.body
-        const users = await User.findOne({email}).select('-password')
+        const {id} = req.body
+        const users = await User.findById(id).select('-password')
+
+        await User.findByIdAndUpdate(
+        users,
+        { $inc: { views: 1 } },
+        { new: true }
+        )
+
 
         if(!users) return res.status(404).json({
             status: "Error",
@@ -192,7 +199,7 @@ const uploadProfilePicture = async (req, res) => {
       profile: updatedProfile,
       imageUrl: result.secure_url,
     });
-    
+     
   } catch (error) {
     return handleError(res, error,"Error uploading profile picture" )
   }

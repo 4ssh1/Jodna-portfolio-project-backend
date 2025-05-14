@@ -78,9 +78,10 @@ const getProject = async (req, res) => {
     try {
         const {projectId} = req.params
         const project = await Project.findByIdAndUpdate(
-      projectId,
-      { $inc: { views: 1 } }, // Increment views by 1
-      { new: true }
+        projectId,
+        { $inc: { views: 1 } }, // Increment views by 1
+        {isDraft: false},
+        { new: true }
     );
 
     if (!project) {

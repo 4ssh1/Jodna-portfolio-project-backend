@@ -16,15 +16,15 @@ projectRouter.patch('/profile-picture', protect, rateLimiter ,upload.single('ima
              .get('/search', filterProject)
              .patch('update/:id', protect, updateProject)
              .get('/drafts', protect, getDrafts)
-             .post('/like', protect, likePortfolio)
-             .post('/bookmark', protect, bookMarkPortfolio)
-             .post('/follow', protect, followPortfolio)
-             .post('/create-comment', protect, createComment)
+             .post('/like/:id', protect, likePortfolio)
+             .post('/bookmark/:id', protect, bookMarkPortfolio)
+             .post('/follow/:id', protect, followPortfolio)
+             .post('/create-comment/:id', protect, createComment)
              .get('/comment', getComments)
              .patch('/update-comment/:id', protect, updateComment)
              .delete('/delete-comment/:id', protect, deleteComment)
-             .get('/draft', protect, getDraft)
-             .get('/project', getProject)
+             .get('/draft/:id', protect, getDraft)
+             .get('/project/:id', protect, getProject)
 
 
 module.exports = projectRouter
