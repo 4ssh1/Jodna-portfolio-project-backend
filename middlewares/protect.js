@@ -2,7 +2,7 @@ const User = require('../models/userModel')
 const jwt = require('jsonwebtoken')
 
 const protect = async (res, req, next)=>{
-    const token = res.cookie.refreshToken
+    const token = res.cookies.refreshToken
 
     if(!token) return res.status(404).json({
         status: "Error",
