@@ -8,14 +8,21 @@ const UserSchema = mongoose.Schema({
         unique: true,
         validate: {
             validator: async function (value) {
-                const users = await this.constructor.findOne({
-                    name: new RegExp(`^${value}$`, 'i')
-                })
-                return !users
+            const user = await this.constructor.findOne({
+                fullname: new RegExp(`^${value}$`, 'i')
+            });
+
+            // Skip if it's the same document (e.g., updating)
+            if (user && this._id && user._id.toString() !== this._id.toString()) {
+                return false;
+            }
+
+            return !user;
             },
             message: "Username exists, try using a nickname"
         }
     },
+
     email:{
         type: String,
         required: true,
@@ -41,22 +48,32 @@ const UserSchema = mongoose.Schema({
     profilePic: {
         type: String, 
     }
-}, {timeStamps: true})
+}, {timestamps: true})
 
 UserSchema.pre("save", async function(next){
-    if(this.isModified("password")) return next()
-    try {
-        const salt = await bcrypt.genSalt(10)
-        this.password = await bcrypt.hash(this.password, salt)   
-        
-        const existingUser = await this.constructor.findOne({email: this.email})
-        if(existingUser) throw new Error("Email is already in use")
-    } catch (error) {
-       console.log(error.message) 
+  try {
+    // Hash the password only if it's new or changed
+    if (this.isModified("password")) {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
     }
-    next()
-})
 
+    if (this.isNew) {  // Only check for duplicates when creating a new user
+      const existingUser = await this.constructor.findOne({ email: this.email });
+      if (existingUser) {
+        const err = new Error("Email is already in use");
+        return next(err);
+      }
+    }  
+
+    next();
+  } catch (error) {
+    next(error); // Pass error to Mongoose properly
+  }
+});
+
+
+//check for where this function is used and correct
 UserSchema.methods.isVallidatePassword = async function (password){
     return await bcrypt.compare(password, this.password)
 }

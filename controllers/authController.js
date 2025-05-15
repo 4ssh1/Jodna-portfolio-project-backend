@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
-const Project = require('../models/projectModel')
 const {genAccessToken, genRefreshToken} = require('../middlewares/token')
 const Subscriber = require('../models/subscriberModel')
 const sendEmail = require('../utils/emailService');
@@ -9,20 +8,25 @@ const registerUser = async (req, res)=>{
     try {
         const {firstname, lastname, email, password} = req.body
 
+        if(!firstname || !lastname || !email || !password){
+            return res.status(400).json({
+                status: "Error",
+                message: "All fields are required." 
+            })
+        }
+
         const user = new User({
             firstname, lastname, email, password
         })
 
         user.fullname = `${firstname} ${lastname}`
 
-        const _user = await user.save()  // without the _user variable i would be able to use user in the respective places as it alters user
+        await user.save()  
 
-        await Project.create({ user: _user._id });
-
-        const accessToken = genAccessToken(_user)
-        const refreshToken = genRefreshToken(_user)
-
-        _user.password = undefined
+        user.password = undefined
+        
+        const accessToken = genAccessToken(user)
+        const refreshToken = genRefreshToken(user)
 
             return res.status(200).cookie('refreshToken', refreshToken, {
                     httpOnly: true,
@@ -33,7 +37,7 @@ const registerUser = async (req, res)=>{
                     status: "Successful",
                     message: "User registered successfully",
                     data: {
-                        _user, accessToken, refreshToken
+                        user, accessToken, refreshToken
                     }
                 })
             
@@ -261,3 +265,6 @@ const authorise = async (req, res, next) => {
 
 module.exports = {registerUser, loginUser, logOutUser, getSubscribers, removeSubscribers, refreshToken, addSubscriber, authorise}
 
+// if (error instanceof mongoose.Error.ValidationError) {
+//     // Handle validation errors
+//     console.error('Validation Error:', error.errors);

@@ -33,26 +33,26 @@ const getAllUser = async(req, res)=>{
 
 const getUser = async(req, res)=>{
     try {
-        const {id} = req.body
-        const users = await User.findById(id).select('-password')
+        const {id} = req.params
+        const user = await User.findById(id).select('-password')
 
         await User.findByIdAndUpdate(
-        users,
+        user,
         { $inc: { views: 1 } },
         { new: true }
         )
 
 
-        if(!users) return res.status(404).json({
+        if(!user) return res.status(404).json({
             status: "Error",
             message: "User not found"
         })
 
         res.status(200).json({
             status: "Successful",
-            message: "Users found",
+            message: "User found",
             data:{
-                count: users.length
+                user
             }
         })
     } catch (error) {
@@ -65,54 +65,60 @@ const getUser = async(req, res)=>{
 }
 
 const updateUser = async (req, res) => {
-    try {
-        const {id} = req.params
-        const user = await User.findById(id)
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
 
-        // const user = await User.findById(id).select('-password');
-        // the password field is never included in the response
-
-        if(!user){
-            return res.status(404).json({
-                status: "Error",
-                message: "User not updated"
-            })
-        }
-
-        const allowedUpdates = ['firstName', 'lastName', 'email', 'role', 'password'];
-        allowedUpdates.forEach(field =>{
-            if(req.body[field] !== undefined){
-                user[field] = req.body[field]
-            }
-        })
-
-        await user.save() // runs all validators and pre-save hooks, will trigger pre-save hashing
-
-        
-        const userObj = user.toObject({ getters: true });
-        // Convert the Mongoose user document to a plain JavaScript object, 
-        // including virtuals and getters, without affecting the database. 
-        // This ensures the response is clean and frontend-friendly.
-        // does not modify database
-
-        delete userObj.password; // delete is a javascript concept used primarily for objects, not good for arrays
-
-
-        res.status(200).json({
-            status: "Successful",
-            message: "User updated successfully",
-            data:{
-                user: userObj
-            }
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            status: "Error",
-            message: "User not updated"
-        })
+    if (!user) {
+      return res.status(404).json({
+        status: "Error",
+        message: "User not found"
+      });
     }
+
+    // Get current fullname and split it
+    const [currentFirstname = '', ...rest] = user.fullname.split(' ');
+    const currentLastname = rest.join(' '); // Handles middle names or compound last names
+
+    // Use new values if provided, otherwise fallback to current values
+    const firstnameToUse = req.body.firstname ?? currentFirstname;
+    const lastnameToUse = req.body.lastname ?? currentLastname;
+
+    // Check if at least one of them is updated
+    if (
+      req.body.firstname === undefined &&
+      req.body.lastname === undefined
+    ) {
+      return res.status(400).json({
+        status: "Error",
+        message: "No valid fields provided for update"
+      });
+    }
+
+    user.fullname = `${firstnameToUse} ${lastnameToUse}`.trim()
+
+    await user.save()
+
+    const userObj = user.toObject({ getters: true })
+    delete userObj.password
+
+    res.status(200).json({
+      status: "Successful",
+      message: "User updated successfully",
+      data: { user: userObj }
+    })
+
+  } catch (error) {
+    res.status(500).json({
+      status: "Error",
+      message: "User not updated",
+      error: error.message || error
+    })
+  }
 }
+
+
+
 
 const deleteUser = async (req, res) => {
     try {
@@ -185,7 +191,7 @@ const uploadProfilePicture = async (req, res) => {
 
     // Upload the image to Cloudinary using the utility function
     const result = await uploadToCloudinary(buffer, 'profile_pictures');
-
+    console.log(result.secure_url)
     // Store the URL of the uploaded image in the user's profile
     const updatedProfile = await User.findOneAndUpdate(
        req.user._id ,  // Assuming you're using a user identifier from your auth middleware
