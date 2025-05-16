@@ -8,7 +8,7 @@ const { uploadProjectPicture, createProject, getDrafts, deleteDraft, getDraft, g
     getPublishedProjects, filterProject, updateProject, deleteProject} = require('../controllers/projectController')
 const upload = require('../utils/multer')
 
-projectRouter.patch('/profile-picture', protect, rateLimiter ,upload.single('image'),uploadProjectPicture)
+projectRouter.patch('/profile-picture', protect, rateLimiter ,upload.single('profile-pic'),uploadProjectPicture)
              .post('/create', protect, createProject)
              .delete('/delete/:id', protect, deleteProject)
              .delete('/delete-draft/:id', protect, deleteDraft)

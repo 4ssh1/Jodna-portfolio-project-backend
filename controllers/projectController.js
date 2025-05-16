@@ -1,5 +1,6 @@
 const Project = require('../models/projectModel')
 const uploadToCloudinary = require('../utils/cloudinary')
+const {handleError} = require('../utils/helpers/serverErrorHandler')
 
 const createProject = async (req, res)=>{
     try {
@@ -317,7 +318,7 @@ const uploadProjectPicture = async (req, res) =>{
       const result = await uploadToCloudinary(buffer, 'project_images');
   
       // Store the URL of the uploaded image in the user's profile
-      const updatedProject = await Project.findByIdAndUpdate(
+      await Project.findByIdAndUpdate(
         req.params.projectId,
         { imageUrl: result.secure_url },
         { new: true }
