@@ -53,7 +53,7 @@ const registerUser = async (req, res)=>{
 const loginUser = async (req, res)=>{
     try {
         const {email, password} = req.body
-        const user = await User.findOne({email}).select('-password')
+        const user = await User.findOne({email})        
 
         if(!user) return res.status(404).json({
             status: "Error",
@@ -66,10 +66,10 @@ const loginUser = async (req, res)=>{
             message: "Invalid Email or password"
         })
 
-        const genAccessToken = genAccessToken(user)
+        const accessToken = genAccessToken(user)
         const refreshToken = genRefreshToken(user)
 
-        return  res.status(200).cookie('refreshToken', refreshToken,{
+        return  res.status(200).cookie('refreshToken', refreshToken, {
             httpOnly: true,
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -79,7 +79,6 @@ const loginUser = async (req, res)=>{
             message: "User logged in successfully",
             data:{
                 user,
-                genAccessToken,
                 refreshToken
             }
         })
@@ -94,7 +93,7 @@ const loginUser = async (req, res)=>{
 }
 
 const logOutUser = (req, res)=>{
-    const token = res.cookie.refreshToken
+    const token = req.cookies.refreshToken
     if(!token) return res.status(401).json({
         status: "Error",
         message: "No token"
@@ -157,9 +156,9 @@ const getSubscribers = async (req, res) => {
 
 const removeSubscribers = async (req, res) => {
     try {
-        const {subscriberId} = req.params
+        const {id} = req.params
 
-        const subscriber = await Subscriber.findById(subscriberId)
+        const subscriber = await Subscriber.findById(id)
 
         if(!subscriber){
             return res.status(404).json({
@@ -169,7 +168,7 @@ const removeSubscribers = async (req, res) => {
         }
 
         await Subscriber.deleteOne({
-            _id: subscriberId
+            _id: id
         })
 
         res.status(200).json({

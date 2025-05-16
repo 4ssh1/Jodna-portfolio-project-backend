@@ -74,7 +74,7 @@ UserSchema.pre("save", async function(next){
 
 
 //check for where this function is used and correct
-UserSchema.methods.isVallidatePassword = async function (password){
+UserSchema.methods.isValidatePassword = async function (password){
     return await bcrypt.compare(password, this.password)
 }
 

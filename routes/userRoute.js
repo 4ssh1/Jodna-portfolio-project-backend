@@ -1,17 +1,17 @@
 const express = require('express')
 const userRouter = express.Router()
 const {logOutUser, loginUser, registerUser, getSubscribers, authorise, removeSubscribers, refreshToken, addSubscriber} = require('../controllers/authController')
-const {getAllUser, viewsOfUsers} = require('../controllers/userController')
+const {getAllUser, viewsOfUser} = require('../controllers/userController')
 const protect = require('../middlewares/protect')
 
-userRouter.post('/login', loginUser)
+userRouter.post('/log-in', loginUser)
           .post('/sign-in', registerUser)
           .post('/log-out', logOutUser)
-          .get('/subscribers', authorise, getSubscribers)
-          .get('all-users', authorise, getAllUser)
-          .get('views', viewsOfUsers)
-          .post('refresh-token', protect, refreshToken)
-          .post('add-subscribers', protect, addSubscriber)
-          .post('/remove-subscribers', protect, removeSubscribers)
+          .get('/views/:id', viewsOfUser)
+          .post('/refresh-token', protect, refreshToken)
+          .post('/add-subscribers', protect, addSubscriber)
+          .delete('/remove-subscriber/:id', protect, removeSubscribers)
+          .get('/subscribers', authorise, getSubscribers) // check this with authorised user
+          .get('/all-users', authorise, getAllUser)
 
 module.exports = userRouter

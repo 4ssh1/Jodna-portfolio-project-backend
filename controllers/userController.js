@@ -150,10 +150,10 @@ const deleteUser = async (req, res) => {
     
 }
 
-const viewsOfUsers = async (req, res) => {
+const viewsOfUser = async (req, res) => {
     const {id} = req.params
     const user = User.findById(id)
-    const project = Project.find({createdBy: id})
+    const project = await Project.find({createdBy: id})
 
     if(!user){
         return res.status(404).json({
@@ -215,5 +215,5 @@ const uploadProfilePicture = async (req, res) => {
 
 
 
-module.exports = {getUser, updateUser, deleteUser, viewsOfUsers, getAllUser, uploadProfilePicture}
+module.exports = {getUser, updateUser, deleteUser, viewsOfUser, getAllUser, uploadProfilePicture}
 
