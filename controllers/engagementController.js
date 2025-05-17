@@ -1,15 +1,15 @@
 const {BookMark, Follows, Likes, Comment} = require('../models/engagementModel')
-const handleError = require('../utils/helpers/serverErrorHandler')
+const {handleError} = require('../utils/helpers/serverErrorHandler')
 const connectedUsers = require('../app')
 const Project = require('../models/projectModel')
 const User = require('../models/userModel')
 
 const likePortfolio = async (req, res)=>{
     try {
-        const {projectId} = req.params
+        const {id} = req.params
         const userId = req.user._id
 
-        if(!projectId || !userId){
+        if(!id || !userId){
             return res.status(404).json({
                 status: "Error",
                 message: "Missing Id"
@@ -17,8 +17,8 @@ const likePortfolio = async (req, res)=>{
         }
 
         const prevLiked = await Likes.findOne({
-            user: userId,
-            portfolio: projectId
+            portfolio: id,
+            user: userId
         })
 
         
@@ -27,26 +27,25 @@ const likePortfolio = async (req, res)=>{
                 _id: prevLiked._id
             })
             return res.status(200).json({
-                status: "Successful",
                 message: "Like removed"
             })
         }else{
             const userLiked = await Likes.create({
-                user: userId,
-                portfolio: projectId
+                portfolio: id,
+                user: userId
             })
             
             const io = req.app.get('io')
-            const project = await Project.findById(projectId).populate('user', '_id')
-            const ownerId = project.user._id.toString()
-            const liker = await User.findById(userId).select('name')
+            const project = await Project.findById(id).populate('createdBy', '_id name')
+            const ownerId = project.createdBy?.toString()
             const socketId = connectedUsers[ownerId]
 
         if(socketId){
+            console.log(`Emitting to socket: ${socketId}`)
             io.to(socketId).emit('notification', {
                 type: 'like',
-                message: `A ${liker.name} liked your portfolio`,
-                projectId: projectId,
+                message: `A ${project.createdBy.name} liked your portfolio`,
+                projectId: id,
                 userId: userId
             })
         }
@@ -55,7 +54,9 @@ const likePortfolio = async (req, res)=>{
             status: "Successful",
             message: "Successfully liked portfolio",
             data: {
-                userLiked
+                userLiked,
+                liker: project.createdBy.name,
+                project
             }
         })
         }

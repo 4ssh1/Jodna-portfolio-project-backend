@@ -5,6 +5,7 @@ const {handleError} = require('../utils/helpers/serverErrorHandler')
 const createProject = async (req, res)=>{
     try {
         const { title, description, githubLink, liveLink, category, technologies, bio, isDraft } = req.body
+        const id = req.user._id
 
         const requiredFields = {
             title: "Title is required",
@@ -22,11 +23,12 @@ const createProject = async (req, res)=>{
               });
             }
           }
+          console.log("req.user", id, "user", req.user)
           
-        const profile = Project.create({
-            title, description, githubLink, liveLink, imageUrl, category, technologies, bio, isDraft  
+        const profile = await Project.create({
+            title, description, githubLink, liveLink, category, technologies, bio, isDraft, createdBy: id
         })
-
+        
         if(!profile) return res.status(404).json({
             status: "Error",
             message: "Project not created"
@@ -36,11 +38,19 @@ const createProject = async (req, res)=>{
             status: "Successful",
             message: "Project created successfully",
             data:{
-                profile
+                title,
+                description,
+                githubLink,
+                liveLink,
+                category,
+                technologies,
+                isDraft,
+                projectUrl: profile.imageUrl ?? "",
+                createdBy: profile.createdBy
             }
         })
         } catch (error) {
-            return res.staus(500).json({
+            return res.status(500).json({
                 status: "Error",
                 message: "Project not created",
                 error: error.message
@@ -151,28 +161,30 @@ const filterProject = async (req, res)=>{
 
 const updateProject = async (req, res)=>{
     try {
-        const {projectId} = req.params
-        const project = Project.findOne({
-            _id: projectId,
+        const {id} = req.params
+        const project = await Project.findOne({
+            _id: id,
+            createdBy: req.user._id,
             isDraft: false
         })
-
+        
         if(!project){
             return res.status(404).json({
                 status: "Error",
                 message: "Project not found"
             })
         }
-
-        if(project.user.toString() !== req.user._id.toString()){
+        
+        
+        if(project.createdBy.toString() !== req.user._id.toString()){
             return res.staus(403).json({
                 status: "Error",
                 message: "User not authorised"
             })
         }
-
-        const allowedUpdates = ['title', 'description', 'user', 'githubLink', 'liveLink', 'imageUrl', 
-            'category', 'technologies', 'bio', 'views', 'isDraft'];
+        
+        const allowedUpdates = ['title', 'description', 'githubLink', 'liveLink', 
+            'category', 'technologies', 'isDraft'];
         allowedUpdates.forEach(field =>{
             if(req.body[field] !== undefined){
                 project[field] = req.body[field]

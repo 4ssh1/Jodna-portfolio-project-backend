@@ -9,11 +9,6 @@ const ProjectSchema = mongoose.Schema({
         type: String,
         default: ""
     },
-    user:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
     githubLink:{
         type: String,
         required: true,
