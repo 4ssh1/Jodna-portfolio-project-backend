@@ -21,24 +21,24 @@ const io = new Server(server, {
     }
 })
 
-const connectedUsers = {};
+const connectedUsers = {}
 
 io.on('connection', (socket)=>{
     console.log("New client connected: ", socket.id)
-
+    
     // Register user with their userId
     socket.on("register", (userId) => {
-        connectedUsers[userId] = socket.id;
+      connectedUsers[userId] = socket.id;
         console.log(`User ${userId} registered with socket ID ${socket.id}`)
     })
     socket.on('sendNotification', ({receiverId, message})=>{
-        io.to(receiverId).emit('getNotification', message)
+      io.to(receiverId).emit('getNotification', message)
     })
-
+    
     socket.on('disconnect', ()=>{
-        console.log('client disconnected')
+      console.log('client disconnected')
     })
-
+    
     // Find and remove the disconnected user from connectedUsers
     for (const [userId, sockId] of Object.entries(connectedUsers)) {
       if (sockId === socket.id) {
@@ -47,9 +47,10 @@ io.on('connection', (socket)=>{
         break;
       }
     }
-})
+  })
 
 app.set('io', io); // Make IO available in controllers
+app.set('connectedUsers', connectedUsers)
 
 app.use(express.urlencoded({extended: true}))
 app.use(cors())
@@ -82,4 +83,3 @@ server.listen(PORT, ()=>{
 })
 
 
-module.exports = {connectedUsers}

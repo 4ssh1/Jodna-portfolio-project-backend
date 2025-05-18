@@ -1,6 +1,5 @@
 const {Bookmark, Follows, Likes, Comment} = require('../models/engagementModel')
 const {handleError} = require('../utils/helpers/serverErrorHandler')
-const connectedUsers = require('../app')
 const Project = require('../models/projectModel')
 
 const likePortfolio = async (req, res)=>{
@@ -36,8 +35,9 @@ const likePortfolio = async (req, res)=>{
             })
             
             const io = req.app.get('io')
+            const connectedUsers = req.app.get('connectedUsers')
             const project = await Project.findById(id).populate('createdBy', '_id name')
-            const ownerId = project.createdBy?.toString()
+            const ownerId = project.createdBy?._id?.toString() || project.createdBy?.toString()
             const socketId = connectedUsers[ownerId]
             
             if(socketId){
@@ -45,8 +45,6 @@ const likePortfolio = async (req, res)=>{
                 io.to(socketId).emit('notification', {
                     type: 'like',
                     message: `A ${project.createdBy.name} liked your portfolio`,
-                    id: id,
-                    userId: userId
             })
         }
 
@@ -90,24 +88,37 @@ const bookMarkPortfolio = async (req, res) => {
                 status: "Succesful",
                 message: "Bookmark removed"
             })
-        }else{
+        }
             const userbookmarked = await Bookmark.create({
                 user: userId,
                 portfolio: id
             })
             
             const io = req.app.get('io')
-            const project = await Project.findById(id).populate('user', '_id name')
-            const ownerId = project.createdBy?.toString()
+            const connectedUsers = req.app.get('connectedUsers')
+            const project = await Project.findById(id).populate('createdBy', '_id name')
+
+            if (!project || !project.createdBy) {
+                return res.status(404).json({
+                    status: "Error",
+                    message: "Project or owner not found"
+                })
+                }
+
+            const ownerId = project.createdBy?._id?.toString() || project.createdBy?.toString() 
             const socketId = connectedUsers[ownerId]
+            console.log("ownerId:",ownerId, "socketId:",socketId, "connectedUsers:",connectedUsers)
 
             if(socketId){
                 io.to(socketId).emit('notification', {
                     type: 'bookmark',
                     message: `A ${project.createdBy.name} bookmarked your portfolio`,
                     id: id,
-                })
-            }      
+                });
+                } else {
+                console.log("No socketId found for ownerId:", ownerId);
+                }
+ 
     
         return res.status(200).json({
             status: "Successful",
@@ -116,7 +127,6 @@ const bookMarkPortfolio = async (req, res) => {
                 userbookmarked
             }
         })
-    }
     } catch (error) {
         return handleError(res, error, "User had error bookmarking project");
     }
@@ -154,8 +164,9 @@ const followPortfolio = async (req, res) => {
             })
             
             const io = req.app.get('io')
-            const project = await Project.findById(id).populate('user', '_id name')
-            const ownerId = project.createdBy?.toString()
+            const connectedUsers = req.app.get('connectedUsers')
+            const project = await Project.findById(id).populate('createdBy', '_id name')
+            const ownerId = project.createdBy?._id?.toString() || project.createdBy?.toString()
             const socketId = connectedUsers[ownerId]        
 
         if(socketId){
@@ -198,8 +209,9 @@ const createComment = async (req, res) => {
         })
 
         const io = req.app.get('io')
-        const project = await Project.findById(id).populate('user', '_id name')
-        const ownerId = project.createdBy?.toString()
+        const connectedUsers = req.app.get('connectedUsers')
+        const project = await Project.findById(id).populate('createdBy', '_id name')
+        const ownerId = project.createdBy?._id?.toString() || project.createdBy?.toString()
         const socketId = connectedUsers[ownerId]        
 
         if(socketId){
