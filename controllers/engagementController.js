@@ -44,7 +44,7 @@ const likePortfolio = async (req, res)=>{
                 console.log(`Emitting to socket: ${socketId}`)
                 io.to(socketId).emit('notification', {
                     type: 'like',
-                    message: `A ${project.createdBy.name} liked your portfolio`,
+                    message: `${userId} liked your portfolio`,
             })
         }
 
@@ -112,7 +112,7 @@ const bookMarkPortfolio = async (req, res) => {
             if(socketId){
                 io.to(socketId).emit('notification', {
                     type: 'bookmark',
-                    message: `A ${project.createdBy.name} bookmarked your portfolio`,
+                    message: `${userId} bookmarked your portfolio`,
                     id: id,
                 });
                 } else {
@@ -133,61 +133,80 @@ const bookMarkPortfolio = async (req, res) => {
 }
 
 const followPortfolio = async (req, res) => {
-    try { 
-        const userId = req.user._id
-        const {id} = req.params
-    
-        if(!id || !userId){
-            return res.status(404).json({
-                status: "Error",
-                message: "Missing Id"
-            })
-        }
+  try {
+    const followerId = req.user._id
+    const { id: portfolioId } = req.params
 
-        const prevFollowed = await Follows.findOne({
-            user: userId,
-            portfolio: id
-        })
-        
-        if(prevFollowed){
-            await Follows.deleteOne({
-                _id : prevFollowed._id
-            })
-            return res.status(200).json({
-                status: "Succesful",
-                message: "Bookmark removed"
-            })
-        }else{
-            const userFollow = await Follows.create({
-                user: userId,
-                portfolio: id
-            })
-            
-            const io = req.app.get('io')
-            const connectedUsers = req.app.get('connectedUsers')
-            const project = await Project.findById(id).populate('createdBy', '_id name')
-            const ownerId = project.createdBy?._id?.toString() || project.createdBy?.toString()
-            const socketId = connectedUsers[ownerId]        
+    if (!portfolioId || !followerId) {
+      return res.status(400).json({
+        status: "Error",
+        message: "Missing follower or portfolio ID"
+      })
+    }
 
-        if(socketId){
-            io.to(socketId).emit('notification', {
-            type: 'follow',
-            message: `A ${project.createdBy.name} followed your portfolio`,
-            id: id,
-            })
-        }     
-        return res.status(200).json({
-            status: "Successful",
-            message: "followed successfully",
-            data: {
-                userFollow
-            }
-        })
+    const project = await Project.findById(portfolioId).populate('createdBy', '_id name')
+
+    if (!project || !project.createdBy) {
+      return res.status(404).json({
+        status: "Error",
+        message: "Project or owner not found"
+      });
     }
-    } catch (error) {
-        return handleError(res, error, "User couldn't follow");        
+
+    const followingId = project.createdBy._id.toString()
+
+    // Prevent self-follow
+    if (followerId.toString() === followingId) {
+      return res.status(400).json({
+        status: "Error",
+        message: "You cannot follow your own portfolio"
+      })
     }
-}
+
+    // Check if already following
+    const prevFollowed = await Follows.findOne({
+      follower: followerId,
+      following: followingId
+    })
+
+    if (prevFollowed) {
+      await Follows.deleteOne({ _id: prevFollowed._id });
+
+      return res.status(200).json({
+        status: "Successful",
+        message: "Unfollowed successfully"
+      });
+    }
+
+    const newFollow = await Follows.create({
+      follower: followerId,
+      following: followingId
+    });
+
+    const io = req.app.get('io');
+    const connectedUsers = req.app.get('connectedUsers');
+    const socketId = connectedUsers[followingId];
+
+    if (socketId) {
+      io.to(socketId).emit('notification', {
+        type: 'follow',
+        message: `${followerId} followed your portfolio`,
+        id: portfolioId
+      });
+    } else {
+      console.log(`No socketId found for user ${followingId}`)
+    }
+
+    return res.status(200).json({
+      status: "Successful",
+      message: "Followed successfully",
+      data: newFollow
+    })
+
+  } catch (error) {
+    return handleError(res, error, "User couldn't follow the portfolio")
+  }
+};
 
 const createComment = async (req, res) => {
     try {
@@ -217,7 +236,7 @@ const createComment = async (req, res) => {
         if(socketId){
             io.to(socketId).emit('notification', {
             type: 'comment',
-            message: `A ${project.createdBy.name} commented your portfolio`,
+            message: ` ${userId} commented your portfolio`,
             id: id,
             })
         }   
@@ -226,7 +245,7 @@ const createComment = async (req, res) => {
             status: "Successful",
             message: "Commented successfully",
             data:{
-                comment
+                comment,
             }
         })
     } catch (error) {
@@ -248,6 +267,13 @@ const getComments = async (req, res) => {
     const comments = await Comment.find({portfolio: id})
                                   .populate("user", "name email")
                                   .sort({createdAt: -1}) // to show recents first, 1 is to show oldest first
+
+    if(!comments){
+        return res.status(404).json({
+            status: "Error",
+            message: "Comments not found"
+        })
+    }
 
     res.status(200).json({
         status: "Successful",

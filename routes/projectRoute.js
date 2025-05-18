@@ -16,15 +16,15 @@ projectRouter.patch('/profile-picture', protect, rateLimiter ,upload.single('pro
              .post('/follow/:id', protect, followPortfolio)
              .post('/create-comment/:id', protect, createComment)
              .patch('/update-comment/:id', protect, updateComment)
-             .get('/comment', getComments)
+             .get('/comments/:id', getComments)
              .get('/projects', getPublishedProjects)
-             .get('/search', filterProject)
              .get('/drafts', protect, getDrafts)
-             .get('/draft/:id', protect, getDraft)
-             .get('/project/:id', protect, getProject)
+             .get('/draft/:projectId', protect, getDraft)
+             .get('/project/:projectId', protect, getProject)
              .delete('/delete-comment/:id', protect, deleteComment)
-             .delete('/delete/:id', protect, deleteProject)
-             .delete('/delete-draft/:id', protect, deleteDraft)
+             .delete('/delete-project/:projectId', protect, deleteProject) // last two routes needs to nbe checked and also route for getting total likes and follows should be done
+             .delete('/delete-draft/:projectId', protect, deleteDraft)
+             .get('/search', filterProject)
 
 
 module.exports = projectRouter

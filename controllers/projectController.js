@@ -131,10 +131,10 @@ const filterProject = async (req, res)=>{
         }
 
         if(user){
-            filter.user = user
+            filter.createdBy = user
         }
 
-        const projects = await Project.find(filter).populate('user', '-passwod')
+        const projects = await Project.find(filter).populate('createdBy', '-passwod')
         
         if(!projects){
             return res.status(404).json({
