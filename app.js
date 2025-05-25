@@ -5,6 +5,11 @@ const cookie = require('cookie-parser')
 const cors = require('cors')
 const {Server} = require('socket.io')
 const http = require('http')
+const swaggerUi = require('swagger-ui-express')
+const swaggerSpec = require('./swagger/swagger') // adjust path to your swagger config
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
 
 const userRoutes = require('./routes/userRoute')
 const profileRoutes = require('./routes/profileRoute')
