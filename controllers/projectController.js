@@ -23,7 +23,8 @@ const createProject = async (req, res)=>{
               });
             }
           }
-          console.log("req.user", id, "user", req.user)
+
+        const techArray = typeof technologies === 'string' ? technologies.split(/[,\s]+/) : technologies;
           
         const profile = await Project.create({
             title, description, githubLink, liveLink, category, technologies, bio, isDraft, createdBy: id
@@ -43,7 +44,7 @@ const createProject = async (req, res)=>{
                 githubLink,
                 liveLink,
                 category,
-                technologies,
+                technologies: techArray,
                 isDraft,
                 projectUrl: profile.imageUrl ?? "",
                 createdBy: profile.createdBy
@@ -107,7 +108,7 @@ const getProject = async (req, res) => {
 
 const filterProject = async (req, res)=>{
     try {
-        const {category, technologies, search, user} = req.query
+        const {category, technologies,  searchMany, user} = req.query
         let filter = {isDraft: false}
         
         if(category){
@@ -115,40 +116,51 @@ const filterProject = async (req, res)=>{
         }
         
         if(technologies){
-            const techArray = technologies.split(',').map(item=> new RegExp(`^${item}$`, 'i')) ||
-            technologies.split(' ').map(item=> new RegExp(`^${item}$`, 'i'))
-            filter.technologies = {
-                $all: techArray
-            }
+            const techArray = technologies.split(/[,\s]+/).map(item => new RegExp(item.trim(), 'i'))
+            filter.technologies = { $in: techArray }
         }
 
-        if(search){
-            filter.$or = [
-                { title: {$regex: search, $options: 'i'}},
-                {category: {$regex: search, $options: 'i'}},
-                {technologies: {$elemMatch: search, $options: 'i'}}
-            ]
+        const orFilters = [];
+
+        if (searchMany) {
+        orFilters.push(
+            { title: { $regex: searchMany, $options: 'i' } },
+            { category: { $regex: searchMany, $options: 'i' } },
+            { technologies: { $elemMatch: { $regex: searchMany, $options: 'i' } } }
+        )
         }
 
-        if(user){
+        if (orFilters.length > 0) {
+        filter.$or = orFilters
+        }
+
+        if (user && mongoose.Types.ObjectId.isValid(user)) {
             filter.createdBy = user
         }
 
-        const projects = await Project.find(filter).populate('createdBy', '-passwod')
+        console.log("Filter used:", filter)
+
+        const projects = await Project.find(filter).populate('createdBy', '-password')
         
-        if(!projects){
+        if(projects.length === 0){
             return res.status(404).json({
                 status: "No projects found"
             })
         }
 
+        projects.forEach(p => console.log(p.technologies))
         res.status(200).json({
             status: "Successful",
             message: "Projects found successfully",
             data:{
                 projects
             }
-        })
+        })  
+//  {
+//     "status": "Error",
+//     "message": "Projects not retrived by filtering",
+//     "error": "Cast to ObjectId failed for value \"Irene\" (type string) at path \"createdBy\" for model \"Project\""
+// }
         
     } catch (error) {
         return res.status(500).json({
@@ -162,6 +174,7 @@ const filterProject = async (req, res)=>{
 const updateProject = async (req, res)=>{
     try {
         const {id} = req.params
+        const {technologies} = req.body
         const project = await Project.findOne({
             _id: id,
             createdBy: req.user._id,
@@ -177,19 +190,25 @@ const updateProject = async (req, res)=>{
         
         
         if(project.createdBy.toString() !== req.user._id.toString()){
-            return res.staus(403).json({
+            return res.status(403).json({
                 status: "Error",
                 message: "User not authorised"
             })
         }
         
-        const allowedUpdates = ['title', 'description', 'githubLink', 'liveLink', 
-            'category', 'technologies', 'isDraft'];
-        allowedUpdates.forEach(field =>{
-            if(req.body[field] !== undefined){
-                project[field] = req.body[field]
+        const allowedUpdates = ['title', 'description', 'githubLink', 'liveLink', 'category', 'technologies', 'isDraft']
+        const techArray = typeof technologies === 'string' ? technologies.split(/[,\s]+/) : technologies
+        allowedUpdates.forEach(field => {
+        if (req.body[field] !== undefined) {
+            if (field === "technologies") {
+            project.technologies = techArray
+            return
+            }else{
+            project[field] = req.body[field]
             }
+        }
         })
+
 
         const updated = await project.save()
         const updatedProject = updated.toObject()

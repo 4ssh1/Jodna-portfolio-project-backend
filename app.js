@@ -66,7 +66,7 @@ app.use('/api/project', projectRoutes)
 app.use('/api/profile', profileRoutes)
 
 // 404 handler for unmatched routes
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).json({
     status: 'Error',
     message: 'Route not found'
