@@ -49,7 +49,7 @@ module.exports = profileRouter
  *                   type: string
  *                 profilePicture:
  *                   type: string
- *                 // Add other user fields as applicable
+ *                 # Add other user fields as applicable
  *       404:
  *         description: User not found
  */
@@ -83,7 +83,7 @@ module.exports = profileRouter
  *                 type: string
  *               bio:
  *                 type: string
- *               // Add other updatable fields here
+ *               # Add other updatable fields here
  *     responses:
  *       200:
  *         description: User profile updated successfully

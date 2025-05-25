@@ -13,8 +13,7 @@ const options = {
         url: "https://portfolio-backend-kj30.onrender.com/",
       },
     ],
-  },
-  components: {
+    components: {
       securitySchemes: {
         bearerAuth: {
           type: "http",
@@ -22,10 +21,12 @@ const options = {
           bearerFormat: "JWT",
         }
       }
+    },
+    security: [{ bearerAuth: [] }],
   },
   apis: ["../routes/*.js", "../controllers/*.js"], 
-  security: [{ bearerAuth: []}],
 }
+
 
 const swaggerSpec = swaggerJsDoc(options);
 module.exports = swaggerSpec;
