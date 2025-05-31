@@ -17,10 +17,10 @@ projectRouter.patch('/project-pictures', protect, rateLimiter ,upload.single('pr
              .get('/drafts', protect, getDrafts)
              .get('/:id/drafts', protect, getDraft)
              .get('/search', filterProject)
-             .get('/likes', getLikes)
-             .get('/bookmarks', getBookmarks)
-             .get('/follows', getFollowing)
-             .get('/followers', getFollowers)
+             .get('/:id/likes', getLikes)
+             .get('/:id/bookmarks', getBookmarks)
+             .get('/:id/follows', getFollowing)
+             .get('/:id/followers', getFollowers)
              .post('/', protect, createProject)
              .post('/:id/likes', protect, likePortfolio)
              .post('/:id/bookmarks', protect, bookMarkPortfolio)
@@ -255,10 +255,10 @@ module.exports = projectRouter
 
 /**
  * @swagger
- * /api/v1/projects/likes:
+ * /api/v1/projects/{id}/likes:
  *   get:
  *     security: []
- *     summary: Get likes
+ *     summary: Get all likes by projectID
  *     tags: [Projects]
  *     responses:
  *       200:
@@ -267,10 +267,10 @@ module.exports = projectRouter
 
 /**
  * @swagger
- * /api/v1/projects/bookmarks:
+ * /api/v1/projects/{id}/bookmarks:
  *   get:
  *     security: []
- *     summary: Get bookmarks
+ *     summary: Get all bookmarks by projectID
  *     tags: [Projects]
  *     responses:
  *       200:
@@ -279,10 +279,10 @@ module.exports = projectRouter
 
 /**
  * @swagger
- * /api/v1/projects/follows:
+ * /api/v1/projects/{id}/follows:
  *   get:
  *     security: []
- *     summary: Get followed users
+ *     summary: Get all followed users using userID
  *     tags: [Projects]
  *     responses:
  *       200:
@@ -291,10 +291,10 @@ module.exports = projectRouter
 
 /**
  * @swagger
- * /api/v1/projects/followers:
+ * /api/v1/projects/{id}/followers:
  *   get:
  *     security: []
- *     summary: Get followers
+ *     summary: Get all followers using userID
  *     tags: [Projects]
  *     responses:
  *       200:
@@ -347,7 +347,7 @@ module.exports = projectRouter
  * @swagger
  * /api/v1/projects/{id}/likes:
  *   post:
- *     summary: Like a project, id is portfolioID
+ *     summary: Like a project, id is projectID
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
@@ -366,7 +366,7 @@ module.exports = projectRouter
  * @swagger
  * /api/v1/projects/{id}/bookmarks:
  *   post:
- *     summary: Bookmark a project with portfolioID
+ *     summary: Bookmark a project with projectID
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
@@ -385,7 +385,7 @@ module.exports = projectRouter
  * @swagger
  * /api/v1/projects/{id}/follows:
  *   post:
- *     summary: Follow a project with portfolioID
+ *     summary: Follow a project with projectID
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
