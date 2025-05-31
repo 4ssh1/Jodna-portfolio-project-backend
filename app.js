@@ -66,9 +66,9 @@ app.get('/', (req, res)=>{
     res.send("Hello World")
 })
 
-app.use('/api/user', userRoutes)
-app.use('/api/project', projectRoutes)
-app.use('/api/profile', profileRoutes)
+app.use('/api/v1/users', userRoutes)
+app.use('/api/v1/projects', projectRoutes)
+app.use('/api/v1/profiles', profileRoutes)
 
 // 404 handler for unmatched routes
 app.use((req, res) => {

@@ -7,12 +7,12 @@ const protect = require('../middlewares/protect')
 userRouter.post('/log-in', loginUser)
           .post('/sign-in', registerUser)
           .post('/log-out', logOutUser)
-          .get('/views/:id', viewsOfUser)
           .post('/refresh-token', protect, refreshToken)
-          .post('/add-subscribers', protect, addSubscriber)
-          .delete('/remove-subscriber/:id', protect, removeSubscribers)
-          .get('/subscribers', authorise, getSubscribers) // check this with authorised user
-          .get('/all-users', authorise, getAllUser)
+          .post('/subscribers', protect, addSubscriber)
+          .get('/:id/views', viewsOfUser)
+          .get('/subscribers', authorise, getSubscribers)
+          .get('/', authorise, getAllUser)
+          .delete('/:id/subscriber', protect, removeSubscribers)
 
 module.exports = userRouter
 
@@ -25,10 +25,11 @@ module.exports = userRouter
 
 /**
  * @swagger
- * /api/user/log-in:
+ * /api/v1/users/log-in:
  *   post:
  *     summary: Log in a user
  *     tags: [User]
+ *     security: []
  *     requestBody:
  *       description: User login credentials
  *       required: true
@@ -54,10 +55,11 @@ module.exports = userRouter
 
 /**
  * @swagger
- * /api/user/sign-in:
+ * /api/v1/users/sign-in:
  *   post:
  *     summary: Register a new user
  *     tags: [User]
+ *     security: []
  *     requestBody:
  *       description: User registration details
  *       required: true
@@ -86,12 +88,11 @@ module.exports = userRouter
 
 /**
  * @swagger
- * /api/user/log-out:
+ * /api/v1/users/log-out:
  *   post:
  *     summary: Log out the authenticated user
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
+ *     security: []
  *     responses:
  *       200:
  *         description: User logged out successfully
@@ -101,7 +102,7 @@ module.exports = userRouter
 
 /**
  * @swagger
- * /api/user/views/{id}:
+ * /api/v1/users/{id}/views:
  *   get:
  *     summary: Get the number of views for a user profile
  *     tags: [User]
@@ -128,7 +129,7 @@ module.exports = userRouter
 
 /**
  * @swagger
- * /api/user/refresh-token:
+ * /api/v1/users/refresh-token:
  *   post:
  *     summary: Refresh JWT token for authenticated user
  *     tags: [User]
@@ -143,7 +144,7 @@ module.exports = userRouter
 
 /**
  * @swagger
- * /api/user/add-subscribers:
+ * /api/v1/users/subscribers:
  *   post:
  *     summary: Add a subscriber to the authenticated user
  *     tags: [User]
@@ -168,7 +169,7 @@ module.exports = userRouter
 
 /**
  * @swagger
- * /api/user/remove-subscriber/{id}:
+ * /api/v1/users/{id}/subscriber:
  *   delete:
  *     summary: Remove a subscriber by subscriber ID
  *     tags: [User]
@@ -192,7 +193,7 @@ module.exports = userRouter
 
 /**
  * @swagger
- * /api/user/subscribers:
+ * /api/v1/users/subscribers:
  *   get:
  *     summary: Get subscribers of the authorized user
  *     tags: [User]
@@ -220,7 +221,7 @@ module.exports = userRouter
 
 /**
  * @swagger
- * /api/user/all-users:
+ * /api/v1/users:
  *   get:
  *     summary: Get all users (admin or authorized users only)
  *     tags: [User]

@@ -2,29 +2,33 @@ const express = require('express')
 const projectRouter = express.Router()
 const protect = require('../middlewares/protect')
 const rateLimiter = require('../middlewares/rateLimiter')
-const { likePortfolio, bookMarkPortfolio, followPortfolio, createComment, 
-    getComments, updateComment, deleteComment } = require('../controllers/engagementController')
+const { likePortfolio, bookMarkPortfolio, followPortfolio, createComment, getComments, updateComment, deleteComment, getBookmarks, 
+    getFollowers, getFollowing, getLikes } = require('../controllers/engagementController')
 const { uploadProjectPicture, createProject, getDrafts, deleteDraft, getDraft, getProject,
     getPublishedProjects, filterProject, updateProject, deleteProject} = require('../controllers/projectController')
 const upload = require('../utils/multer')
 
-projectRouter.patch('/profile-picture', protect, rateLimiter ,upload.single('profile-pic'),uploadProjectPicture)
-             .patch('/update/:id', protect, updateProject)
-             .post('/create', protect, createProject)
-             .post('/like/:id', protect, likePortfolio)
-             .post('/bookmark/:id', protect, bookMarkPortfolio)
-             .post('/follow/:id', protect, followPortfolio)
-             .post('/create-comment/:id', protect, createComment)
-             .patch('/update-comment/:id', protect, updateComment)
-             .get('/comments/:id', getComments)
-             .get('/projects', getPublishedProjects)
+projectRouter.patch('/project-pictures', protect, rateLimiter ,upload.single('profile-pic'),uploadProjectPicture)
+             .patch('/:id/updates', protect, updateProject)
+             .patch('/:id/comments', protect, updateComment)
+             .get('/:id/comments', getComments)
+             .get('/', getPublishedProjects)
+             .get('/:id', protect, getProject)
              .get('/drafts', protect, getDrafts)
-             .get('/draft/:projectId', protect, getDraft)
-             .get('/project/:projectId', protect, getProject)
-             .delete('/delete-comment/:id', protect, deleteComment)
-             .delete('/delete-project/:projectId', protect, deleteProject) // route for getting total likes and follows should be done
-             .delete('/delete-draft/:draftId', protect, deleteDraft)
+             .get('/:id/drafts', protect, getDraft)
              .get('/search', filterProject)
+             .get('/likes', getLikes)
+             .get('/bookmarks', getBookmarks)
+             .get('/follows', getFollowing)
+             .get('/followers', getFollowers)
+             .post('/', protect, createProject)
+             .post('/:id/likes', protect, likePortfolio)
+             .post('/:id/bookmarks', protect, bookMarkPortfolio)
+             .post('/:id/follows', protect, followPortfolio)
+             .post('/:id/comments', protect, createComment)
+             .delete('/:id/comments', protect, deleteComment)
+             .delete('/:id/projects', protect, deleteProject) 
+             .delete('/:id/drafts', protect, deleteDraft)
 
 
 module.exports = projectRouter
@@ -38,7 +42,7 @@ module.exports = projectRouter
 
 /**
  * @swagger
- * /api/project/profile-picture:
+ * /api/v1/projects/project-pictures:
  *   patch:
  *     summary: Upload or update project profile picture
  *     tags: [Projects]
@@ -53,11 +57,11 @@ module.exports = projectRouter
  *           schema:
  *             type: object
  *             properties:
- *               'profile-pic':
+ *               profile-pic:
  *                 type: string
  *                 format: binary
  *             required:
- *               - 'profile-pic'
+ *               - profile-pic
  *     responses:
  *       200:
  *         description: Profile picture updated successfully
@@ -67,21 +71,19 @@ module.exports = projectRouter
 
 /**
  * @swagger
- * /api/project/update/{id}:
+ * /api/v1/projects/{id}/updates:
  *   patch:
- *     summary: Update project details by ID
+ *     summary: Update project details by projectID
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
- *         description: Project ID
  *         required: true
  *         schema:
  *           type: string
  *     requestBody:
- *       description: Project fields to update
  *       required: true
  *       content:
  *         application/json:
@@ -109,22 +111,205 @@ module.exports = projectRouter
  *         description: Project updated successfully
  *       401:
  *         description: Unauthorized
- *       403:
- *         description: User not authorised
- *       404:
- *         description: Project not found
  */
 
 /**
  * @swagger
- * /api/project/create:
+ * /api/v1/projects/{id}/comments:
+ *   patch:
+ *     summary: Update a comment by commentID
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - comment
+ *             properties:
+ *               comment:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Comment updated successfully
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects/{id}/comments:
+ *   get:
+ *     summary: Get comments for a project by projectID
+ *     tags: [Projects]
+ *     security: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Comments retrieved successfully
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects:
+ *   get:
+ *     summary: Get all published projects
+ *     security: []
+ *     tags: [Projects]
+ *     responses:
+ *       200:
+ *         description: List of published projects
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects/{id}:
+ *   get:
+ *     summary: Get project by user ID
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Project retrieved successfully
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects/drafts:
+ *   get:
+ *     summary: Get drafts
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Drafts retrieved
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects/{id}/drafts:
+ *   get:
+ *     summary: Get draft by user ID
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Draft retrieved
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects/search:
+ *   get:
+ *     security: []
+ *     summary: Search projects
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: technologies
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: searchMany
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: user
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Filtered projects
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects/likes:
+ *   get:
+ *     security: []
+ *     summary: Get likes
+ *     tags: [Projects]
+ *     responses:
+ *       200:
+ *         description: List of likes
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects/bookmarks:
+ *   get:
+ *     security: []
+ *     summary: Get bookmarks
+ *     tags: [Projects]
+ *     responses:
+ *       200:
+ *         description: List of bookmarks
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects/follows:
+ *   get:
+ *     security: []
+ *     summary: Get followed users
+ *     tags: [Projects]
+ *     responses:
+ *       200:
+ *         description: List of followed users
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects/followers:
+ *   get:
+ *     security: []
+ *     summary: Get followers
+ *     tags: [Projects]
+ *     responses:
+ *       200:
+ *         description: List of followers
+ */
+
+/**
+ * @swagger
+ * /api/v1/projects:
  *   post:
- *     summary: Create a new project
+ *     summary: Create project
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       description: Project data to create
  *       required: true
  *       content:
  *         application/json:
@@ -155,102 +340,81 @@ module.exports = projectRouter
  *                 type: boolean
  *     responses:
  *       201:
- *         description: Project created successfully
- *       400:
- *         description: Validation error
- *       401:
- *         description: Unauthorized
+ *         description: Project created
  */
 
 /**
  * @swagger
- * /api/project/like/{id}:
+ * /api/v1/projects/{id}/likes:
  *   post:
- *     summary: Like a project by ID
+ *     summary: Like a project, id is portfolioID
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
- *         description: Project ID to like
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Project liked successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Project not found
+ *         description: Liked successfully
  */
 
 /**
  * @swagger
- * /api/project/bookmark/{id}:
+ * /api/v1/projects/{id}/bookmarks:
  *   post:
- *     summary: Bookmark a project by ID
+ *     summary: Bookmark a project with portfolioID
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
- *         description: Project ID to bookmark
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Project bookmarked successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Project not found
+ *         description: Bookmarked successfully
  */
 
 /**
  * @swagger
- * /api/project/follow/{id}:
+ * /api/v1/projects/{id}/follows:
  *   post:
- *     summary: Follow a project owner by project ID
+ *     summary: Follow a project with portfolioID
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
- *         description: Project ID to follow owner
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
  *         description: Followed successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Project or user not found
  */
 
 /**
  * @swagger
- * /api/project/create-comment/{id}:
+ * /api/v1/projects/{id}/comments:
  *   post:
- *     summary: Create a comment on a project
+ *     summary: Comment on portfolio with portfolioID
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
- *         description: Project ID to comment on
  *         required: true
  *         schema:
  *           type: string
  *     requestBody:
- *       description: Comment text
  *       required: true
  *       content:
  *         application/json:
@@ -263,248 +427,64 @@ module.exports = projectRouter
  *                 type: string
  *     responses:
  *       201:
- *         description: Comment created successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Project not found
+ *         description: Comment added
  */
 
 /**
  * @swagger
- * /api/project/update-comment/{id}:
- *   patch:
- *     summary: Update a comment by comment ID
- *     tags: [Projects]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         description: Comment ID to update
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       description: Updated comment text
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - comment
- *             properties:
- *               comment:
- *                 type: string
- *     responses:
- *       200:
- *         description: Comment updated successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Comment not found
- */
-
-/**
- * @swagger
- * /api/project/comments/{id}:
- *   get:
- *     summary: Get all comments for a project by project ID
- *     tags: [Projects]
- *     parameters:
- *       - in: path
- *         name: id
- *         description: Project ID to get comments for
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: List of comments
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   comment:
- *                     type: string
- *                   createdBy:
- *                     type: string
- *                   createdAt:
- *                     type: string
- *                     format: date-time
- *       404:
- *         description: Project or comments not found
- */
-
-/**
- * @swagger
- * /api/project/projects:
- *   get:
- *     summary: Get all published projects (non-draft)
- *     tags: [Projects]
- *     responses:
- *       200:
- *         description: List of published projects
- */
-
-/**
- * @swagger
- * /api/project/drafts:
- *   get:
- *     summary: Get all drafts for the authenticated user
- *     tags: [Projects]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of draft projects
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /api/project/draft/{projectId}:
- *   get:
- *     summary: Get a draft project by ID for the authenticated user
- *     tags: [Projects]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: projectId
- *         description: Draft project ID
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Draft project found
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Draft project not found
- */
-
-/**
- * @swagger
- * /api/project/project/{projectId}:
- *   get:
- *     summary: Get a published project by ID for authenticated users
- *     tags: [Projects]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: projectId
- *         description: Project ID
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Project found
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Project not found
- */
-
-/**
- * @swagger
- * /api/project/delete-comment/{id}:
+ * /api/v1/projects/{id}/comments:
  *   delete:
- *     summary: Delete a comment by comment ID
+ *     summary: Delete comment with commentID
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
- *         description: Comment ID
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Comment deleted successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Comment not found
+ *         description: Comment deleted
  */
 
 /**
  * @swagger
- * /api/project/delete-project/{id}:
+ * /api/v1/projects/{id}/projects:
  *   delete:
- *     summary: Delete a project by ID
+ *     summary: Delete project with projectID
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
- *         description: Project ID
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Project deleted successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Project not found
+ *         description: Project deleted
  */
 
 /**
  * @swagger
- * /api/project/search:
- *   get:
- *     summary: Search projects with filters
+ * /api/v1/projects/{id}/drafts:
+ *   delete:
+ *     summary: Delete draft project with draftID
  *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: category
+ *       - in: path
+ *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         description: Filter projects by category
- *       - in: query
- *         name: technologies
- *         schema:
- *           type: string
- *         description: Comma-separated list of technologies
- *       - in: query
- *         name: searchMany
- *         schema:
- *           type: string
- *         description: Search term for title, category, or technologies
- *       - in: query
- *         name: user
- *         schema:
- *           type: string
- *         description: Filter projects by user ID
  *     responses:
  *       200:
- *         description: List of filtered projects
- *       404:
- *         description: No projects found
- */
-
-/**
- * @swagger
- * /api/project/all-projects:
- *   get:
- *     summary: Get all projects (including drafts and published)
- *     tags: [Projects]
- *     responses:
- *       200:
- *         description: List of all projects
+ *         description: Draft deleted
  */
 
 

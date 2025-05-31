@@ -5,10 +5,10 @@ const rateLimiter = require('../middlewares/rateLimiter')
 const upload = require('../utils/multer')
 const {getUser, updateUser, uploadProfilePicture, deleteUser} = require('../controllers/userController')
 
-profileRouter.get('/me/:id', getUser)
-             .patch('/update/:id', protect, updateUser)
-             .patch('/upload-pic/:id', protect, rateLimiter ,upload.single('image'), uploadProfilePicture)
-             .delete('/delete/:id', protect, deleteUser)
+profileRouter.get('/:id', getUser)
+             .patch('/:id', protect, updateUser)
+             .patch('/:id/profile-pic', protect, rateLimiter ,upload.single('image'), uploadProfilePicture)
+             .delete('/:id', protect, deleteUser)
 
 
 module.exports = profileRouter
@@ -22,7 +22,7 @@ module.exports = profileRouter
 
 /**
  * @swagger
- * /api/profile/me/{id}:
+ * /api/v1/profiles/{id}:
  *   get:
  *     summary: Get user profile by user ID
  *     tags: [Profile]
@@ -56,7 +56,7 @@ module.exports = profileRouter
 
 /**
  * @swagger
- * /api/profile/update/{id}:
+ * /api/v1/profiles/{id}:
  *   patch:
  *     summary: Update user profile by ID
  *     tags: [Profile]
@@ -95,7 +95,7 @@ module.exports = profileRouter
 
 /**
  * @swagger
- * /api/profile/upload-pic/{id}:
+ * /api/v1/profiles/{id}/profile-pic:
  *   patch:
  *     summary: Upload or update profile picture
  *     tags: [Profile]
@@ -131,7 +131,7 @@ module.exports = profileRouter
 
 /**
  * @swagger
- * /api/profile/delete/{id}:
+ * /api/v1/profiles/{id}:
  *   delete:
  *     summary: Delete user profile by ID
  *     tags: [Profile]

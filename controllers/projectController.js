@@ -88,9 +88,9 @@ const getPublishedProjects = async (req, res)=>{
 
 const getProject = async (req, res) => {
     try {
-        const {projectId} = req.params
+        const {id} = req.params
         const project = await Project.findByIdAndUpdate(
-        projectId,
+        id,
         { $inc: { views: 1 } }, // Increment views by 1
         {isDraft: false},
         { new: true }
@@ -232,8 +232,8 @@ const updateProject = async (req, res)=>{
 
 const deleteProject = async (req, res)=>{
     try {
-      const {projectId} = req.params
-      const project = await Project.findById(projectId) 
+      const {id} = req.params
+      const project = await Project.findById(id) 
       
       if(!project){
         return res.status(404).json({
@@ -291,8 +291,8 @@ const getDrafts = async (req, res)=>{
 
 const getDraft = async (req, res) => {
     try {
-        const {projectId} = req.params
-        const project = await Project.findById(projectId)
+        const {id} = req.params
+        const project = await Project.findById(id)
         if (!project) {
         return res.status(404).json({ message: 'Project not found' });
         }
@@ -304,9 +304,9 @@ const getDraft = async (req, res) => {
 
 const deleteDraft = async (req, res)=>{
     try {
-        const {draftId} = req.params
+        const {id} = req.params
         const draft = await Project.findOne({
-            _id: draftId,
+            _id: id,
             isDraft: true
         })
 
@@ -320,7 +320,7 @@ const deleteDraft = async (req, res)=>{
         const deleted = await draft.deleteOne()
 
         // const deleted = await Project.deleteOne({
-        //     _id: draftId,
+        //     _id: id,
         //     isDraft: true
         // }) this does a second call to the database so the above is better
 
@@ -350,7 +350,7 @@ const uploadProjectPicture = async (req, res) =>{
   
       // Store the URL of the uploaded image in the user's profile
       await Project.findByIdAndUpdate(
-        req.params.projectId,
+        req.params.id,
         { imageUrl: result.secure_url },
         { new: true }
         );

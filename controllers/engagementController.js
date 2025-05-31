@@ -59,7 +59,7 @@ const likePortfolio = async (req, res)=>{
         })
         
     } catch (error) {
-        return handleError(res, error, "User not liked");
+        return handleError(res, error, "User not liked")
     }
 }
 
@@ -359,7 +359,118 @@ const deleteComment = async (req, res) => {
     }
 }
 
+const getLikes = async (req, res)=>{
+    try {
+        
+        const {id} = req.params
+    
+        if(!id){
+            return res.status(404).json({
+                status: "Error",
+                message: "Missing Id"
+            })
+        }
+    
+        const likes = await Likes.find({portfolio: id})
+    
+        if(likes.length === 0){
+            return res.status(400).json({
+                message: "No likes"
+            })
+        }
+    
+        return res.status(200).json({
+            status: "Successful",
+            message: "Likes retrieved successfully",
+            data:{
+                number: likes.length 
+            }
+        })
+    } catch (error) {
+        return handleError(res, error, "error retrieving likes")        
+    }
+}
+
+const getBookmarks = async (req, res) => {
+    try {
+        const {id} = req.params
+
+        if(!id){
+            return res.status(400).json({
+                message: "Missing id"
+            })
+        }
+
+        const bookmarks = await Bookmark.find({portfolio: id})
+        if(bookmarks.length === 0){
+            return res.status(400).json({
+                message: "No bookmarks"
+            })
+        }
+
+        return res.status(200).json({
+            status: "Successful",
+            message: "data retrieved successfully",
+            data: {
+                number: bookmarks.length
+            }
+        })
+
+    } catch (error) {
+       return handleError(res, error, "error getting bookmarks") 
+    }
+}
+
+const getFollowers = async (req, res) => {
+    try {
+        const {id} = req.params
+        if(!id){
+            return res.status(400).json({
+                message: "Missing id"
+            })
+        }
+    
+        const followers = await Follows.countDocuments({ following: id })
+    
+        return res.status(200).json({
+            status: " Successful",
+            message: "Followers count retrieved successfully",
+            data:{
+                number: followers
+            }
+        })
+        
+    } catch (error) {
+        return handleError(res, error, "Failed to get followers count")
+    }
+}
+
+const getFollowing = async (req, res) => {
+    try {
+        const {id} = req.params
+        if(!id){
+            return res.status(400).json(
+                {message: "Missing id"}
+            )
+        }
+    
+        const following = await Follows.countDocuments({follower: id})
+    
+        return res.status(200).json({
+            status: "Successful",
+            message: "Total number of following retrieved successfully",
+            data: {
+                following: following
+            }
+        })
+        
+    } catch (error) {
+        return handleError(res, error, "Error retrieving following")
+    }
+}
+
 module.exports = {
-    likePortfolio, bookMarkPortfolio, followPortfolio, createComment, getComments, updateComment, deleteComment
+    likePortfolio, bookMarkPortfolio, followPortfolio, createComment, getComments, updateComment, deleteComment,
+    getLikes, getBookmarks, getFollowers, getFollowing
 }
 
