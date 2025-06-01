@@ -7,6 +7,7 @@ const {Server} = require('socket.io')
 const http = require('http')
 const swaggerUi = require('swagger-ui-express')
 const swaggerSpec = require('./swagger/swagger') // adjust path to your swagger config
+const path = require('path')
 
 
 
@@ -56,7 +57,11 @@ const io = new Server(server, {
   app.set('io', io); // Make IO available in controllers
   app.set('connectedUsers', connectedUsers)
   
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+app.use('/swagger-custom', express.static(path.join(__dirname, 'swagger-custom.css')))
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCssUrl: '/swagger-custom.css'
+}))
 app.use(express.urlencoded({extended: true}))
 app.use(cors())
 app.use(cookie())
@@ -65,6 +70,7 @@ app.use(cookie())
 app.get('/', (req, res)=>{
     res.send("Hello World")
 })
+
 
 app.use('/api/v1/users', userRoutes)
 app.use('/api/v1/projects', projectRoutes)
