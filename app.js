@@ -57,7 +57,7 @@ const io = new Server(server, {
   app.set('io', io); // Make IO available in controllers
   app.set('connectedUsers', connectedUsers)
   
-app.use('/swagger-custom', express.static(path.join(__dirname, 'swagger-custom.css')))
+app.use('/swagger-custom.css', express.static(path.join(__dirname, 'swagger-custom.css')))
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customCssUrl: '/swagger-custom.css'
