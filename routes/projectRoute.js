@@ -9,7 +9,7 @@ const { uploadProjectPicture, createProject, getDrafts, deleteDraft, getDraft, g
 const upload = require('../utils/multer')
 
 projectRouter.patch('/project-pictures', protect, rateLimiter ,upload.single('profile-pic'),uploadProjectPicture)
-             .patch('/:id/updates', protect, updateProject)
+             .patch('/:id', protect, updateProject)
              .patch('/:id/comments', protect, updateComment)
              .get('/:id/comments', getComments)
              .get('/', getPublishedProjects)
@@ -27,7 +27,7 @@ projectRouter.patch('/project-pictures', protect, rateLimiter ,upload.single('pr
              .post('/:id/follows', protect, followPortfolio)
              .post('/:id/comments', protect, createComment)
              .delete('/:id/comments', protect, deleteComment)
-             .delete('/:id/projects', protect, deleteProject) 
+             .delete('/:id', protect, deleteProject) 
              .delete('/:id/drafts', protect, deleteDraft)
 
 
@@ -71,7 +71,7 @@ module.exports = projectRouter
 
 /**
  * @swagger
- * /api/v1/projects/{id}/updates:
+ * /api/v1/projects/{id}:
  *   patch:
  *     summary: Update project details by projectID
  *     tags: [Projects]
@@ -451,7 +451,7 @@ module.exports = projectRouter
 
 /**
  * @swagger
- * /api/v1/projects/{id}/projects:
+ * /api/v1/projects/{id}:
  *   delete:
  *     summary: Delete project with projectID
  *     tags: [Projects]
