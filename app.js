@@ -6,7 +6,7 @@ const cors = require('cors')
 const {Server} = require('socket.io')
 const http = require('http')
 const swaggerUi = require('swagger-ui-express')
-const swaggerSpec = require('./swagger/swagger') // adjust path to your swagger config
+const swaggerSpec = require('./swagger/swagger')
 const path = require('path')
 
 
@@ -22,7 +22,6 @@ const server = http.createServer(app) // Create HTTP server from Express app
 const io = new Server(server, {
     cors: {
         origin: "",
-        // methods: ["GET", "POST"]
       }
     })
     
@@ -31,7 +30,6 @@ const io = new Server(server, {
     io.on('connection', (socket)=>{
       console.log("New client connected: ", socket.id)
       
-      // Register user with their userId
       socket.on("register", (userId) => {
         connectedUsers[userId] = socket.id;
         console.log(`User ${userId} registered with socket ID ${socket.id}`)
@@ -54,7 +52,7 @@ const io = new Server(server, {
     }
   })
 
-  app.set('io', io); // Make IO available in controllers
+  app.set('io', io)
   app.set('connectedUsers', connectedUsers)
   
 app.use('/swagger-custom.css', express.static(path.join(__dirname, 'swagger-custom.css')))
