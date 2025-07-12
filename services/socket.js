@@ -1,8 +1,8 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
-const User = require('./models/userModel'); // adjust if needed
+const User = require('../models/userModel');
 
-const connectedUsers = {}; // Export this if you want to use it elsewhere
+const connectedUsers = {}
 
 const setupSocket = (server) => {
   const io = new Server(server, {
@@ -39,12 +39,10 @@ const setupSocket = (server) => {
     // Register user
     connectedUsers[socket.user._id] = socket.id;
 
-    // Receive and forward notification
     socket.on('sendNotification', ({ receiverId, message }) => {
       io.to(receiverId).emit('getNotification', message);
     });
 
-    // Handle disconnect
     socket.on('disconnect', () => {
       console.log("Client disconnected:", socket.id);
 
