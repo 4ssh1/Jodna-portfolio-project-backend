@@ -23,7 +23,7 @@ module.exports = authRouter
  * /api/v1/auth/log-in:
  *   post:
  *     summary: Log in a user
- *     tags: [User]
+ *     tags: [Auth]
  *     security: []
  *     requestBody:
  *       description: User login credentials
@@ -53,7 +53,7 @@ module.exports = authRouter
  * /api/v1/auth/sign-in:
  *   post:
  *     summary: Register a new user
- *     tags: [User]
+ *     tags: [Auth]
  *     security: []
  *     requestBody:
  *       description: User registration details
@@ -86,7 +86,7 @@ module.exports = authRouter
  * /api/v1/auth/log-out:
  *   post:
  *     summary: Log out the authenticated user
- *     tags: [User]
+ *     tags: [Auth]
  *     security: []
  *     responses:
  *       200:
@@ -100,7 +100,7 @@ module.exports = authRouter
  * /api/v1/auth/refresh-token:
  *   post:
  *     summary: Refresh JWT token for authenticated user
- *     tags: [User]
+ *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
  *     responses:
