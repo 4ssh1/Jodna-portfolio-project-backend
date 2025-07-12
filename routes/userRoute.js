@@ -1,14 +1,10 @@
 const express = require('express')
 const userRouter = express.Router()
-const {logOutUser, loginUser, registerUser, getSubscribers, authorise, removeSubscribers, refreshToken, addSubscriber} = require('../controllers/authController')
+const { getSubscribers, authorise, removeSubscribers, addSubscriber} = require('../controllers/authController')
 const {getAllUser, viewsOfUser} = require('../controllers/userController')
 const protect = require('../middlewares/protect')
 
-userRouter.post('/log-in', loginUser)
-          .post('/sign-in', registerUser)
-          .post('/log-out', logOutUser)
-          .post('/refresh-token', protect, refreshToken)
-          .post('/subscribers', protect, addSubscriber)
+userRouter.post('/subscribers', protect, addSubscriber)
           .get('/:id/views', viewsOfUser)
           .get('/subscribers', authorise, getSubscribers)
           .get('/', authorise, getAllUser)
@@ -20,85 +16,9 @@ module.exports = userRouter
  * @swagger
  * tags:
  *   name: User
- *   description: API endpoints for user authentication and management
+ *   description: API endpoints for user management
  */
 
-/**
- * @swagger
- * /api/v1/users/log-in:
- *   post:
- *     summary: Log in a user
- *     tags: [User]
- *     security: []
- *     requestBody:
- *       description: User login credentials
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: User logged in successfully with token
- *       400:
- *         description: Invalid credentials
- */
-
-/**
- * @swagger
- * /api/v1/users/sign-in:
- *   post:
- *     summary: Register a new user
- *     tags: [User]
- *     security: []
- *     requestBody:
- *       description: User registration details
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - email
- *               - password
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *                 format: email
- *               password:
- *                 type: string
- *     responses:
- *       201:
- *         description: User registered successfully
- *       400:
- *         description: Validation error
- */
-
-/**
- * @swagger
- * /api/v1/users/log-out:
- *   post:
- *     summary: Log out the authenticated user
- *     tags: [User]
- *     security: []
- *     responses:
- *       200:
- *         description: User logged out successfully
- *       401:
- *         description: Unauthorized
- */
 
 /**
  * @swagger
@@ -127,20 +47,6 @@ module.exports = userRouter
  *         description: User not found
  */
 
-/**
- * @swagger
- * /api/v1/users/refresh-token:
- *   post:
- *     summary: Refresh JWT token for authenticated user
- *     tags: [User]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Token refreshed successfully
- *       401:
- *         description: Unauthorized
- */
 
 /**
  * @swagger

@@ -155,7 +155,6 @@ const followPortfolio = async (req, res) => {
 
     const followingId = project.createdBy._id.toString()
 
-    // Prevent self-follow
     if (followerId.toString() === followingId) {
       return res.status(400).json({
         status: "Error",
@@ -163,14 +162,13 @@ const followPortfolio = async (req, res) => {
       })
     }
 
-    // Check if already following
     const prevFollowed = await Follows.findOne({
       follower: followerId,
       following: followingId
     })
 
     if (prevFollowed) {
-      await Follows.deleteOne({ _id: prevFollowed._id });
+      await Follows.deleteOne({ _id: prevFollowed._id })
 
       return res.status(200).json({
         status: "Successful",
@@ -181,7 +179,10 @@ const followPortfolio = async (req, res) => {
     const newFollow = await Follows.create({
       follower: followerId,
       following: followingId
-    });
+    })
+
+    await newFollow.populate('follower', 'name')
+    const followerName = newFollow.follower.name
 
     const io = req.app.get('io');
     const connectedUsers = req.app.get('connectedUsers');
@@ -190,7 +191,7 @@ const followPortfolio = async (req, res) => {
     if (socketId) {
       io.to(socketId).emit('notification', {
         type: 'follow',
-        message: `${followerId} followed your portfolio`,
+        message: `${followerName} followed your portfolio`,
         id: portfolioId
       });
     } else {

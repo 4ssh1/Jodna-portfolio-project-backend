@@ -13,6 +13,7 @@ const protect = async (req, res, next)=>{
     
         const verifyUser = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
         const user = await User.findOne({_id: verifyUser.id}).select("-password")
+        soc
     
         if(!user){
             return res.status(404).json({

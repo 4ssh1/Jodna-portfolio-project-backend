@@ -232,7 +232,6 @@ const addSubscriber = async (req, res) => {
 
     const subscriber = await Subscriber.create({ email });
 
-    // Send welcome email
     await sendEmail(
       email,
       'Thanks for Subscribing!',
